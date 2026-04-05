@@ -1,26 +1,145 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ─── VOA Brand Token System ─────────────────────────────────────────────── */
+@theme {
+  --color-brand-blue:   #1E3A8A;
+  --color-brand-orange: #F97316;
+  --color-brand-green:  #22C55E;
+  --color-primary:      #1E3A8A;
+  --color-cta:          #F97316;
+  --color-success:      #22C55E;
+  --color-danger:       #EF4444;
+  --color-warning:      #F59E0B;
+  --color-info:         #3B82F6;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* ─── Base ───────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #F8FAFC;
+  color: #1F2937;
+  -webkit-font-smoothing: antialiased;
 }
+.dark body { background-color: #0F172A; color: #F1F5F9; }
+
+/* ─── Scrollbar ──────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 99px; }
+.dark ::-webkit-scrollbar-thumb { background: #334155; }
+
+/* ─── Keyframes ──────────────────────────────────────────────────────────── */
+@keyframes fade-in    { from { opacity: 0 }                              to { opacity: 1 } }
+@keyframes slide-up   { from { transform: translateY(12px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+@keyframes slide-down { from { transform: translateY(-8px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+@keyframes zoom-in    { from { transform: scale(.95); opacity: 0 }       to { transform: scale(1); opacity: 1 } }
+@keyframes bounce-in  { 0% { transform: scale(.3); opacity: 0 } 50% { transform: scale(1.05) } 70% { transform: scale(.9) } 100% { transform: scale(1); opacity: 1 } }
+@keyframes shimmer    { from { background-position: -200% 0 }            to { background-position: 200% 0 } }
+@keyframes float      { 0%,100% { transform: translateY(0) }             50% { transform: translateY(-8px) } }
+@keyframes pulse-ring { 0% { transform: scale(.8); opacity: 1 }          100% { transform: scale(2); opacity: 0 } }
+@keyframes spin-slow  { from { transform: rotate(0deg) }                 to { transform: rotate(360deg) } }
+@keyframes progress   { from { width: 0 }                                to { width: var(--progress-width, 100%) } }
+@keyframes confetti-fall {
+  0%   { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* ─── Utility classes ────────────────────────────────────────────────────── */
+.animate-in        { animation: zoom-in 0.2s ease-out; }
+.animate-slide-up  { animation: slide-up 0.25s ease-out; }
+.animate-slide-down{ animation: slide-down 0.2s ease-out; }
+.animate-bounce-in { animation: bounce-in 0.5s cubic-bezier(.36,.07,.19,.97); }
+.animate-float     { animation: float 3s ease-in-out infinite; }
+.animate-spin-slow { animation: spin-slow 8s linear infinite; }
+
+/* ─── Skeleton ───────────────────────────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+.dark .skeleton {
+  background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+  background-size: 200% 100%;
+}
+
+/* ─── Brand gradients ────────────────────────────────────────────────────── */
+.gradient-brand      { background: linear-gradient(135deg, #1E3A8A 0%, #F97316 100%); }
+.gradient-brand-soft { background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 55%, #F97316 100%); }
+.gradient-brand-r    { background: linear-gradient(135deg, #F97316 0%, #1E3A8A 100%); }
+.gradient-green      { background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%); }
+.gradient-text {
+  background: linear-gradient(135deg, #1E3A8A, #F97316);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Auth image overlay ─────────────────────────────────────────────────── */
+.auth-image-overlay {
+  background: linear-gradient(160deg, rgba(30,58,138,0.88) 0%, rgba(249,115,22,0.75) 100%);
+}
+
+/* ─── Glass card ─────────────────────────────────────────────────────────── */
+.glass {
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.dark .glass {
+  background: rgba(15,23,42,0.6);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* ─── Notification type icons ────────────────────────────────────────────── */
+.notif-program     { background: rgba(30,58,138,0.1);  color: #1E3A8A; }
+.notif-welfare     { background: rgba(239,68,68,0.1);  color: #EF4444; }
+.notif-achievement { background: rgba(249,115,22,0.1); color: #F97316; }
+.notif-general     { background: rgba(34,197,94,0.1);  color: #22C55E; }
+
+/* ─── Progress bar animation ─────────────────────────────────────────────── */
+.progress-bar { animation: progress 1s ease-out forwards; }
+
+/* ─── Step indicator ─────────────────────────────────────────────────────── */
+.step-active   { background: #1E3A8A; color: white; }
+.step-done     { background: #22C55E; color: white; }
+.step-inactive { background: #E2E8F0; color: #94A3B8; }
+.dark .step-inactive { background: #1E293B; color: #475569; }
+
+/* ─── Sidebar shimmer hover ──────────────────────────────────────────────── */
+@keyframes sidebar-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.sidebar-item-hover {
+  background-size: 200% auto;
+  transition: background-position 0.4s ease;
+}
+.sidebar-item-hover:hover {
+  background-image: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 50%, transparent 100%);
+  animation: sidebar-shimmer 1.2s linear infinite;
+}
+
+/* ─── Submenu slide ──────────────────────────────────────────────────────── */
+@keyframes submenu-open {
+  from { opacity: 0; transform: translateY(-6px); max-height: 0; }
+  to   { opacity: 1; transform: translateY(0);    max-height: 400px; }
+}
+@keyframes submenu-close {
+  from { opacity: 1; max-height: 400px; }
+  to   { opacity: 0; max-height: 0; }
+}
+.submenu-enter { animation: submenu-open 0.22s ease-out forwards; overflow: hidden; }
+.submenu-exit  { animation: submenu-close 0.18s ease-in forwards; overflow: hidden; }
+
+/* ─── Sidebar badge pulse ────────────────────────────────────────────────── */
+@keyframes badge-pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.15); }
+}
+.badge-pulse { animation: badge-pulse 2s ease-in-out infinite; }
+
