@@ -29,13 +29,20 @@ export function Badge({ variant = 'default', children, className }: BadgeProps) 
 
 export function statusBadge(status: string): BadgeVariant {
   const map: Record<string, BadgeVariant> = {
-    active: 'success', inactive: 'danger',
+    // Account status
+    active: 'success', inactive: 'danger', pending: 'warning',
+    // Program status
     upcoming: 'blue', ongoing: 'orange', completed: 'success',
-    pending: 'warning', approved: 'success', rejected: 'danger',
+    // Transaction / contribution status
+    approved: 'success', rejected: 'danger',
     'in-progress': 'info', resolved: 'success',
+    // Visibility
     internal: 'default', public: 'blue',
+    // Finance
     income: 'success', expense: 'danger',
+    // Attendance
     present: 'success', absent: 'danger',
+    // Welfare types
     financial: 'orange', personal: 'info', other: 'default',
   };
   return map[status] || 'default';

@@ -5,7 +5,7 @@ export const userService = {
   getById: (id: string) => api.get(`/users/${id}`),
   update: (id: string, data: object) => api.put(`/users/${id}`, data),
   updateMyProfile: (data: object) => api.put('/users/me/profile', data),
-  approve: (id: string) => api.patch(`/users/${id}/approve`),
+  approve: (id: string, data?: { role?: string; isVice?: boolean }) => api.patch(`/users/${id}/approve`, data || {}),
   reject: (id: string) => api.patch(`/users/${id}/reject`),
   assignRole: (id: string, data: object) => api.patch(`/users/${id}/assign-role`, data),
   delete: (id: string) => api.delete(`/users/${id}`),
@@ -55,6 +55,7 @@ export const announcementService = {
   getAll: (params?: object) => api.get('/announcements', { params }),
   getPublic: (params?: object) => api.get('/announcements/public', { params }),
   getById: (id: string) => api.get(`/announcements/${id}`),
+  getMyCategories: () => api.get('/announcements/my-categories'),
   create: (data: FormData) => api.post('/announcements', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
   update: (id: string, data: object) => api.put(`/announcements/${id}`, data),
   delete: (id: string) => api.delete(`/announcements/${id}`),
@@ -70,6 +71,7 @@ export const welfareService = {
 
 export const analyticsService = {
   getDashboard: () => api.get('/analytics/dashboard'),
+  getMyDashboard: () => api.get('/analytics/my-dashboard'),
   getMemberStats: () => api.get('/analytics/members'),
   getLeaderboard: (limit?: number) => api.get('/analytics/leaderboard', { params: { limit } }),
   getProgramMetrics: () => api.get('/analytics/programs'),
@@ -135,13 +137,16 @@ export const roleChangeService = {
 };
 
 export const contributionService = {
-  getAll: (params?: object) => api.get('/contributions', { params }),
-  getById: (id: string) => api.get(`/contributions/${id}`),
   getSummary: (month?: string) => api.get('/contributions/summary', { params: { month } }),
   getRequiredAmount: () => api.get('/contributions/required-amount'),
-  submit: (data: FormData) => api.post('/contributions', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
-  approve: (id: string) => api.patch(`/contributions/${id}/approve`),
-  reject: (id: string, reason: string) => api.patch(`/contributions/${id}/reject`, { reason }),
+  getMonthlyStatus: (month?: string) => api.get('/contributions/monthly-status', { params: { month } }),
+  getMyPoints: () => api.get('/contributions/my-points'),
+  getAllInstallments: (params?: object) => api.get('/contributions/installments', { params }),
+  getAllMonthlyRecords: (params?: object) => api.get('/contributions/monthly-records', { params }),
+  submitInstallment: (data: FormData) => api.post('/contributions/installments', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  approveInstallment: (id: string) => api.patch(`/contributions/installments/${id}/approve`),
+  rejectInstallment: (id: string, reason: string) => api.patch(`/contributions/installments/${id}/reject`, { reason }),
+  recalculate: (month?: string) => api.post('/contributions/recalculate', {}, { params: { month } }),
 };
 
 export const accountService = {
@@ -149,4 +154,46 @@ export const accountService = {
   create: (data: object) => api.post('/accounts', data),
   update: (id: string, data: object) => api.put(`/accounts/${id}`, data),
   delete: (id: string) => api.delete(`/accounts/${id}`),
+};
+
+export const childService = {
+  getMyChildren: () => api.get('/children/my'),
+  getParentChildren: (parentId: string) => api.get(`/children/parent/${parentId}`),
+  addChild: (data: object) => api.post('/children/my', data),
+  addChildForParent: (parentId: string, data: object) => api.post(`/children/parent/${parentId}`, data),
+  updateChild: (childId: string, data: object) => api.put(`/children/my/${childId}`, data),
+  deleteChild: (childId: string) => api.delete(`/children/my/${childId}`),
+  createChildAccount: (childId: string, data: object) => api.post(`/children/my/${childId}/create-account`, data),
+};
+
+export const financeTargetService = {
+  getAll: (params?: object) => api.get('/finance-targets', { params }),
+  getById: (id: string) => api.get(`/finance-targets/${id}`),
+  getSummary: () => api.get('/finance-targets/summary'),
+  create: (data: object) => api.post('/finance-targets', data),
+  update: (id: string, data: object) => api.put(`/finance-targets/${id}`, data),
+  markComplete: (id: string) => api.patch(`/finance-targets/${id}/complete`),
+  delete: (id: string) => api.delete(`/finance-targets/${id}`),
+};
+
+export const pointsService = {
+  getMyHistory: () => api.get('/contributions/my-points'),
+};
+
+export const activityService = {
+  getAll: (params?: object) => api.get('/activities', { params }),
+  getById: (id: string) => api.get(`/activities/${id}`),
+  getMy: () => api.get('/activities/my'),
+  create: (data: object) => api.post('/activities', data),
+  update: (id: string, data: object) => api.put(`/activities/${id}`, data),
+  delete: (id: string) => api.delete(`/activities/${id}`),
+  filterMembers: (criteria: object) => api.post('/activities/filter-members', criteria),
+  invite: (id: string, userIds: string[]) => api.post(`/activities/${id}/invite`, { userIds }),
+  removeInvitee: (id: string, userId: string) => api.delete(`/activities/${id}/invite/${userId}`),
+  respond: (id: string, data: { responseStatus: string; responseReason?: string }) => api.patch(`/activities/${id}/respond`, data),
+  markAttendance: (id: string, data: { attendanceStatus: string; attendanceReason?: string }) => api.patch(`/activities/${id}/attendance`, data),
+  getGallery: (params?: object) => api.get('/activities/gallery', { params }),
+  uploadMedia: (id: string, data: FormData) => api.post(`/activities/${id}/media`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  deleteMedia: (mediaId: string) => api.delete(`/activities/media/${mediaId}`),
+  getPublicMedia: (token: string) => api.get(`/activities/gallery/public/${token}`),
 };

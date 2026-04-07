@@ -71,17 +71,17 @@ export function Navbar() {
   };
 
   return (
-    <header className="h-20 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 md:px-6 gap-4 sticky top-0 z-10 shadow-sm">
+    <header className="h-16 lg:h-20 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-3 md:px-5 gap-2 sticky top-0 z-10 shadow-sm">
       {/* Hamburger */}
-      <button onClick={toggleSidebar} className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors">
+      <button onClick={toggleSidebar} className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors shrink-0">
         <Menu className="w-5 h-5" />
       </button>
 
-      {/* Org name */}
-      <div className="hidden md:flex items-center gap-2 flex-1 ml-1">
-        <span className="text-sm font-bold gradient-text">Voice of Adolescents</span>
-        <span className="text-slate-300 dark:text-slate-700">·</span>
-        <span className="text-xs text-slate-400 font-medium">Management System</span>
+      {/* Org name — hidden on very small screens */}
+      <div className="hidden sm:flex items-center gap-2 flex-1 ml-1 min-w-0">
+        <span className="text-sm font-bold gradient-text truncate">Voice of Adolescents</span>
+        <span className="text-slate-300 dark:text-slate-700 hidden md:block">·</span>
+        <span className="text-xs text-slate-400 font-medium hidden md:block whitespace-nowrap">Management System</span>
       </div>
 
       <div className="flex items-center gap-1">
@@ -103,7 +103,7 @@ export function Navbar() {
           </button>
 
           {notifOpen && (
-            <div className="absolute right-0 top-12 w-84 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 z-50 animate-slide-down overflow-hidden" style={{ width: '340px' }}>
+            <div className="absolute right-0 top-12 notif-dropdown bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 z-50 animate-slide-down overflow-hidden">
               {/* Header */}
               <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-[#1E3A8A]/5 to-transparent dark:from-[#1E3A8A]/20">
                 <div className="flex items-center gap-2">

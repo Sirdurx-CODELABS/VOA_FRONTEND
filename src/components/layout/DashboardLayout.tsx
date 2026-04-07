@@ -17,17 +17,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     document.documentElement.classList.toggle('dark', darkMode);
   }, [darkMode]);
 
-  // Only redirect AFTER Zustand has finished rehydrating from localStorage.
-  // Without this guard, the first render always sees isAuthenticated=false
-  // and immediately redirects — even when the user is logged in.
   useEffect(() => {
-    if (_hydrated && !isAuthenticated) {
-      router.replace('/login');
-    }
+    if (_hydrated && !isAuthenticated) router.replace('/login');
   }, [_hydrated, isAuthenticated, router]);
 
-  // Show a full-screen loader while waiting for localStorage to rehydrate.
-  // This prevents the flash-to-login on refresh.
   if (!_hydrated) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-[#0F172A] flex items-center justify-center">
@@ -42,15 +35,20 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Hydrated but not authenticated — redirect is in flight, render nothing
   if (!isAuthenticated) return null;
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0F172A]">
       <Sidebar />
-      <div className={cn('transition-all duration-300 ease-in-out', sidebarOpen ? 'lg:ml-64' : 'lg:ml-[70px]')}>
+      {/* Content shifts right on lg+ to avoid sidebar overlap */}
+      <div className={cn(
+        'transition-all duration-300 ease-in-out min-w-0',
+        // Mobile: no margin (sidebar is overlay)
+        // lg: collapsed sidebar = 70px, expanded = 256px
+        sidebarOpen ? 'lg:ml-64' : 'lg:ml-[70px]',
+      )}>
         <Navbar />
-        <main className="p-4 md:p-6 min-h-[calc(100vh-5rem)]">
+        <main className="page-padding content-area min-h-[calc(100vh-5rem)]">
           {children}
         </main>
       </div>

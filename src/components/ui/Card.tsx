@@ -10,7 +10,7 @@ export function Card({ className, children, ...props }: CardProps) {
     <div
       className={cn(
         'bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800',
-        'shadow-sm hover:shadow-md transition-shadow duration-200',
+        'shadow-sm hover:shadow-md transition-shadow duration-200 min-w-0 overflow-hidden',
         className
       )}
       {...props}
@@ -22,19 +22,19 @@ export function Card({ className, children, ...props }: CardProps) {
 
 export function CardHeader({ className, children, ...props }: CardProps) {
   return (
-    <div className={cn('px-6 py-4 border-b border-slate-100 dark:border-slate-800', className)} {...props}>
+    <div className={cn('px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-100 dark:border-slate-800', className)} {...props}>
       {children}
     </div>
   );
 }
 
 export function CardContent({ className, children, ...props }: CardProps) {
-  return <div className={cn('px-6 py-4', className)} {...props}>{children}</div>;
+  return <div className={cn('px-4 sm:px-6 py-3 sm:py-4', className)} {...props}>{children}</div>;
 }
 
 export function CardTitle({ className, children, ...props }: CardProps) {
   return (
-    <h3 className={cn('text-base font-bold text-slate-800 dark:text-white', className)} {...props}>
+    <h3 className={cn('text-sm sm:text-base font-bold text-slate-800 dark:text-white', className)} {...props}>
       {children}
     </h3>
   );

@@ -272,15 +272,19 @@ export function Sidebar() {
       <aside className={cn(
         'fixed top-0 left-0 h-full z-30 flex flex-col',
         'bg-[#1E3A8A] transition-all duration-300 ease-in-out',
-        sidebarOpen ? 'w-64' : 'w-0 lg:w-[70px] overflow-hidden',
+        // Mobile: full width drawer (slides in/out), hidden when closed
+        // lg: always visible, collapses to icon-only
+        sidebarOpen
+          ? 'w-64 translate-x-0'
+          : 'w-64 -translate-x-full lg:translate-x-0 lg:w-[70px] overflow-hidden',
       )}>
 
         {/* ── Logo ─────────────────────────────────────────────────── */}
         <div className={cn(
-          'flex items-center h-20 px-4 shrink-0 border-b border-white/10',
+          'flex items-center h-16 lg:h-20 px-4 shrink-0 border-b border-white/10',
           sidebarOpen ? 'justify-between' : 'justify-center',
         )}>
-          {sidebarOpen && <VOALogo onDark size={52} />}
+          {sidebarOpen && <VOALogo onDark size={44} />}
           <button
             onClick={toggleSidebar}
             className={cn(

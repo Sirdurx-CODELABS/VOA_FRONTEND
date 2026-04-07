@@ -7,11 +7,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuthStore } from '@/store/authStore';
 import { authService } from '@/services/auth.service';
-import api from '@/lib/axios';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { VOALogo } from '@/components/ui/VOALogo';
-import { Eye, EyeOff, MailCheck, Mail, Lock, Sparkles } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, Sparkles, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const schema = z.object({
@@ -24,14 +23,13 @@ export default function LoginPage() {
   const router = useRouter();
   const { setAuth } = useAuthStore();
   const [showPass, setShowPass] = useState(false);
-  const [unverifiedEmail, setUnverifiedEmail] = useState('');
-  const [resending, setResending] = useState(false);
+  const [pendingAccount, setPendingAccount] = useState(false);
 
-  const { register, handleSubmit, getValues, formState: { errors, isSubmitting } } = useForm<FormData>({ resolver: zodResolver(schema) });
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({ resolver: zodResolver(schema) });
 
   const onSubmit = async (data: FormData) => {
     try {
-      setUnverifiedEmail('');
+      setPendingAccount(false);
       const res = await authService.login(data);
       const { token, user } = res.data.data;
       setAuth(user, token);
@@ -39,20 +37,13 @@ export default function LoginPage() {
       router.push('/dashboard');
     } catch (err: unknown) {
       const msg: string = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Login failed';
-      if (msg.toLowerCase().includes('verify your email')) setUnverifiedEmail(getValues('email'));
-      toast.error(msg);
+      // Show pending approval banner instead of generic toast
+      if (msg.toLowerCase().includes('pending approval')) {
+        setPendingAccount(true);
+      } else {
+        toast.error(msg);
+      }
     }
-  };
-
-  const handleResend = async () => {
-    setResending(true);
-    try {
-      await api.post('/auth/resend-verification', { email: unverifiedEmail });
-      toast.success('Verification email sent! Check your inbox.');
-      setUnverifiedEmail('');
-    } catch (err: unknown) {
-      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to resend');
-    } finally { setResending(false); }
   };
 
   return (
@@ -65,13 +56,9 @@ export default function LoginPage() {
           className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="absolute inset-0 auth-image-overlay" />
-
-        {/* Content over image */}
         <div className="relative z-10 flex flex-col justify-between p-10 w-full">
           <VOALogo size={56} onDark />
-
           <div className="max-w-xs">
-            {/* Quote */}
             <div className="glass rounded-2xl p-5 mb-6">
               <Sparkles className="w-5 h-5 text-[#F97316] mb-3" />
               <p className="text-white font-bold text-lg leading-snug">
@@ -79,15 +66,12 @@ export default function LoginPage() {
               </p>
               <p className="text-white/60 text-xs mt-2">— VOA Mission Statement</p>
             </div>
-
             <h2 className="text-2xl font-extrabold text-white leading-tight">
               Your community is waiting for you.
             </h2>
             <p className="text-white/70 mt-3 text-sm leading-relaxed">
               Sign in to access programs, track your impact, and connect with fellow change-makers.
             </p>
-
-            {/* Stats */}
             <div className="flex gap-4 mt-6">
               {[{ n: '500+', l: 'Members' }, { n: '50+', l: 'Programs' }, { n: '3yrs', l: 'Impact' }].map(s => (
                 <div key={s.l} className="glass rounded-xl px-3 py-2.5 text-center">
@@ -97,7 +81,6 @@ export default function LoginPage() {
               ))}
             </div>
           </div>
-
           <p className="text-white/30 text-xs">&copy; {new Date().getFullYear()} Voice of Adolescents</p>
         </div>
       </div>
@@ -105,7 +88,6 @@ export default function LoginPage() {
       {/* ── Right: Form panel ─────────────────────────────────────────── */}
       <div className="flex-1 flex items-center justify-center p-6 bg-slate-50 dark:bg-[#0F172A]">
         <div className="w-full max-w-md">
-          {/* Mobile logo */}
           <div className="lg:hidden mb-8 flex justify-center"><VOALogo size={64} /></div>
 
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-8">
@@ -133,18 +115,18 @@ export default function LoginPage() {
               <Button type="submit" loading={isSubmitting} className="w-full" size="lg">Sign in</Button>
             </form>
 
-            {/* Unverified email banner */}
-            {unverifiedEmail && (
+            {/* Pending approval banner */}
+            {pendingAccount && (
               <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl animate-slide-up">
                 <div className="flex items-start gap-3">
-                  <MailCheck className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                  <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shrink-0">
+                    <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  </div>
                   <div>
-                    <p className="text-sm font-bold text-amber-800 dark:text-amber-300">Email not verified</p>
-                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">Check your inbox or request a new link.</p>
-                    <button onClick={handleResend} disabled={resending}
-                      className="mt-2 text-xs font-bold text-amber-700 dark:text-amber-300 hover:underline disabled:opacity-50">
-                      {resending ? 'Sending...' : 'Resend verification email →'}
-                    </button>
+                    <p className="text-sm font-bold text-amber-800 dark:text-amber-300">Account Pending Approval</p>
+                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-1 leading-relaxed">
+                      Your account is awaiting approval from a <strong>Membership Coordinator</strong>, <strong>Chairman</strong>, or <strong>Super Admin</strong>. You will be notified once your account is activated.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -161,7 +143,6 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Constitution link */}
           <p className="text-center text-xs text-slate-400 mt-4">
             By signing in, you agree to the{' '}
             <Link href="/constitution" className="text-[#1E3A8A] dark:text-blue-400 hover:underline font-medium">VOA Constitution</Link>

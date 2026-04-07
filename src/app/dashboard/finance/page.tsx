@@ -1,331 +1,390 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
 import { useAuthStore } from '@/store/authStore';
-import { contributionService, accountService, transactionService } from '@/services/api.service';
-import { Contribution, TreasuryAccount, Transaction } from '@/types';
+import { contributionService, accountService, financeTargetService } from '@/services/api.service';
+import { MonthlyContribution, Installment, TreasuryAccount, FinanceTarget } from '@/types';
 import { hasPermission, PERMISSIONS } from '@/lib/permissions';
-import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/Card';
-import { Table, Pagination } from '@/components/ui/Table';
-import { Badge, statusBadge } from '@/components/ui/Badge';
+import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
-import { Input, Select, Textarea } from '@/components/ui/Input';
-import { StatCard } from '@/components/ui/StatCard';
-import { ReceiptModal } from '@/components/ui/ContributionReceipt';
-import { formatCurrency, formatDate, cn } from '@/lib/utils';
+import { Input } from '@/components/ui/Input';
+import { formatCurrency, formatDate, membershipTypeLabel, calcAge, cn } from '@/lib/utils';
 import {
-  Plus, TrendingUp, TrendingDown, DollarSign, CheckCircle, XCircle,
-  Upload, Copy, MessageCircle, Users, Clock, Wallet, Building2, Receipt,
-  Heart, Star, AlertCircle,
+  CheckCircle, XCircle, Plus, Baby, Heart, Clock, TrendingUp,
+  Users, Wallet, AlertCircle, ChevronDown, ChevronUp,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { ContributionPanel } from './_ContributionPanel';
 
-type Tab = 'contributions' | 'transactions' | 'accounts';
+type Tab = 'my_contribution' | 'all_records' | 'installments' | 'accounts' | 'targets';
 const currentMonth = () => new Date().toISOString().slice(0, 7);
 const fmtMonth = (m: string) => {
   const [y, mo] = m.split('-');
   return new Date(parseInt(y), parseInt(mo) - 1).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
 };
 
-import { SubmitContributionModal } from './_SubmitModal';
-
 export default function FinancePage() {
   const { user: me } = useAuthStore();
-  const [tab, setTab] = useState<Tab>('contributions');
-  const [contributions, setContributions] = useState<Contribution[]>([]);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [tab, setTab] = useState<Tab>('my_contribution');
+  const [allRecords, setAllRecords] = useState<MonthlyContribution[]>([]);
+  const [allInstallments, setAllInstallments] = useState<Installment[]>([]);
   const [accounts, setAccounts] = useState<TreasuryAccount[]>([]);
-  const [summary, setSummary] = useState<{ total: number; approved: number; pending: number; totalAmount: number; totalExtraContributions: number; topSupportersCount: number } | null>(null);
-  const [minimum, setMinimum] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [targets, setTargets] = useState<FinanceTarget[]>([]);
+  const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [month, setMonth] = useState(currentMonth());
+  const [monthFilter, setMonthFilter] = useState(currentMonth());
   const [statusFilter, setStatusFilter] = useState('');
-  const [submitModal, setSubmitModal] = useState(false);
-  const [rejectModal, setRejectModal] = useState<Contribution | null>(null);
-  const [receiptModal, setReceiptModal] = useState<Contribution | null>(null);
+  const [membershipFilter, setMembershipFilter] = useState('');
+  const [expandedRecord, setExpandedRecord] = useState<string | null>(null);
+  const [rejectModal, setRejectModal] = useState<Installment | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
   const [accountModal, setAccountModal] = useState(false);
   const [editAccount, setEditAccount] = useState<TreasuryAccount | null>(null);
-  const [rejectReason, setRejectReason] = useState('');
-  const [submitting, setSubmitting] = useState(false);
   const [accForm, setAccForm] = useState({ accountName: '', bankName: '', accountNumber: '', accountHolderName: '' });
+  const [submitting, setSubmitting] = useState(false);
 
   const isTreasurer = hasPermission(me, PERMISSIONS.MANAGE_CONTRIBUTIONS);
-  const canViewAll = hasPermission(me, PERMISSIONS.VIEW_CONTRIBUTIONS);
-  const canSubmit = hasPermission(me, PERMISSIONS.SUBMIT_CONTRIBUTION);
   const canManageAccounts = hasPermission(me, PERMISSIONS.MANAGE_ACCOUNTS);
 
-  const load = useCallback(async () => {
+  const loadTab = useCallback(async () => {
     setLoading(true);
     try {
-      const [sumRes, reqRes, accRes] = await Promise.allSettled([
-        contributionService.getSummary(month),
-        contributionService.getRequiredAmount(),
-        accountService.getAll(),
-      ]);
-      if (sumRes.status === 'fulfilled') setSummary(sumRes.value.data.data);
-      if (reqRes.status === 'fulfilled') setMinimum(reqRes.value.data.data.minimum);
-      if (accRes.status === 'fulfilled') setAccounts(accRes.value.data.data);
-
-      const cRes = await contributionService.getAll({ page, limit: 10, month, status: statusFilter || undefined });
-      setContributions(cRes.data.data);
-      setTotalPages(cRes.data.pagination.totalPages);
-
-      if (canViewAll) {
-        const txRes = await transactionService.getAll({ page: 1, limit: 10 });
-        setTransactions(txRes.data.data);
+      if (tab === 'all_records') {
+        const res = await contributionService.getAllMonthlyRecords({
+          page, limit: 15, month: monthFilter || undefined,
+          membershipType: membershipFilter || undefined,
+        });
+        setAllRecords(res.data.data);
+        setTotalPages(res.data.pagination?.totalPages ?? 1);
+      } else if (tab === 'installments') {
+        const res = await contributionService.getAllInstallments({
+          page, limit: 15,
+          month: monthFilter || undefined,
+          status: statusFilter || undefined,
+          membershipType: membershipFilter || undefined,
+        });
+        setAllInstallments(res.data.data);
+        setTotalPages(res.data.pagination?.totalPages ?? 1);
+      } else if (tab === 'accounts') {
+        const res = await accountService.getAll();
+        setAccounts(res.data.data);
+      } else if (tab === 'targets') {
+        const res = await financeTargetService.getAll({ isCompleted: false });
+        setTargets(res.data.data);
       }
     } finally { setLoading(false); }
-  }, [page, month, statusFilter, canViewAll]);
+  }, [tab, page, monthFilter, statusFilter, membershipFilter]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { loadTab(); }, [loadTab]);
 
   const handleApprove = async (id: string) => {
-    try { await contributionService.approve(id); toast.success('Approved! Receipt generated.'); load(); }
-    catch { toast.error('Failed'); }
+    try {
+      await contributionService.approveInstallment(id);
+      toast.success('Payment approved!');
+      loadTab();
+    } catch { toast.error('Failed'); }
   };
 
   const handleReject = async () => {
     if (!rejectModal) return;
-    try { await contributionService.reject(rejectModal._id, rejectReason); toast.success('Rejected'); setRejectModal(null); setRejectReason(''); load(); }
-    catch { toast.error('Failed'); }
+    try {
+      await contributionService.rejectInstallment(rejectModal._id, rejectReason);
+      toast.success('Rejected');
+      setRejectModal(null);
+      setRejectReason('');
+      loadTab();
+    } catch { toast.error('Failed'); }
   };
 
   const handleSaveAccount = async () => {
     setSubmitting(true);
     try {
-      if (editAccount) { await accountService.update(editAccount._id, accForm); toast.success('Account updated'); }
+      if (editAccount) { await accountService.update(editAccount._id, accForm); toast.success('Updated'); }
       else { await accountService.create(accForm); toast.success('Account added'); }
-      setAccountModal(false); setEditAccount(null);
+      setAccountModal(false);
+      setEditAccount(null);
       setAccForm({ accountName: '', bankName: '', accountNumber: '', accountHolderName: '' });
-      load();
+      loadTab();
     } catch { toast.error('Failed'); }
     finally { setSubmitting(false); }
   };
 
-  // Check if current user has paid this month
-  const myContribution = contributions.find(c => c.userId?._id === me?._id || (typeof c.userId === 'string' && c.userId === me?._id));
-  const hasPaid = myContribution?.status === 'approved';
-  const hasPending = myContribution?.status === 'pending';
+  const tabs = [
+    { id: 'my_contribution', label: 'My Contribution' },
+    ...(isTreasurer ? [
+      { id: 'all_records', label: 'Monthly Records' },
+      { id: 'installments', label: 'Payments' },
+    ] : []),
+    ...(canManageAccounts ? [{ id: 'accounts', label: 'Accounts' }] : []),
+    { id: 'targets', label: 'Targets' },
+  ] as { id: Tab; label: string }[];
 
-  const contribColumns = [
-    { key: 'member', header: 'Member', render: (c: Contribution) => (
-      <div className="flex items-center gap-2">
-        <div>
-          <p className="font-semibold text-sm text-slate-800 dark:text-white">{c.userId?.fullName}</p>
-          <p className="text-xs text-slate-400">{c.month}</p>
-        </div>
-        {c.isAboveMinimum && <span className="text-[10px] bg-orange-100 dark:bg-orange-900/30 text-[#F97316] font-bold px-2 py-0.5 rounded-full flex items-center gap-1"><Heart className="w-2.5 h-2.5" />Top Supporter</span>}
-      </div>
-    )},
-    { key: 'minimum', header: 'Minimum', render: (c: Contribution) => <span className="text-xs text-slate-500">₦{c.minimumRequiredAmount?.toLocaleString()}</span> },
-    { key: 'amount', header: 'Paid', render: (c: Contribution) => (
+  const filterBar = (
+    <div className="flex gap-2 flex-wrap items-end">
       <div>
-        <span className="font-bold text-[#22C55E]">₦{c.amount?.toLocaleString()}</span>
-        {c.isAboveMinimum && <p className="text-[10px] text-[#F97316] font-semibold">+₦{c.extraAmount?.toLocaleString()} extra</p>}
+        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Month</label>
+        <input type="month" value={monthFilter} onChange={e => { setMonthFilter(e.target.value); setPage(1); }}
+          className="px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/30" />
       </div>
-    )},
-    { key: 'method', header: 'Method', render: (c: Contribution) => <span className="text-xs capitalize text-slate-500">{c.paymentMethod?.replace(/_/g, ' ')}</span> },
-    { key: 'status', header: 'Status', render: (c: Contribution) => <Badge variant={statusBadge(c.status)}>{c.status}</Badge> },
-    { key: 'proof', header: 'Proof', render: (c: Contribution) => c.proofImage ? (
-      <a href={c.proofImage} target="_blank" rel="noopener noreferrer" className="text-xs text-[#1E3A8A] dark:text-blue-400 hover:underline">View</a>
-    ) : <span className="text-xs text-slate-400">—</span> },
-    { key: 'actions', header: '', render: (c: Contribution) => (
-      <div className="flex gap-2 items-center">
-        {c.status === 'approved' && c.receiptNumber && (
-          <button onClick={() => setReceiptModal(c)} className="text-xs text-[#22C55E] hover:underline flex items-center gap-1">
-            <Receipt className="w-3.5 h-3.5" /> Receipt
-          </button>
-        )}
-        {isTreasurer && c.status === 'pending' && (
-          <>
-            <button onClick={() => handleApprove(c._id)} className="p-1.5 rounded-lg text-[#22C55E] hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors" title="Approve"><CheckCircle className="w-4 h-4" /></button>
-            <button onClick={() => { setRejectModal(c); setRejectReason(''); }} className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" title="Reject"><XCircle className="w-4 h-4" /></button>
-          </>
-        )}
+      <div>
+        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Membership</label>
+        <select value={membershipFilter} onChange={e => { setMembershipFilter(e.target.value); setPage(1); }}
+          className="px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/30">
+          <option value="">All Types</option>
+          <option value="adolescent">Adolescent</option>
+          <option value="adult">Adult</option>
+          <option value="parent_guardian">Parent/Guardian</option>
+        </select>
       </div>
-    )},
-  ];
+      {tab === 'installments' && (
+        <div>
+          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Status</label>
+          <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
+            className="px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/30">
+            <option value="">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+      )}
+    </div>
+  );
+
+  const pagination = totalPages > 1 && (
+    <div className="flex justify-between items-center px-4 py-3 border-t border-slate-100 dark:border-slate-800">
+      <p className="text-xs text-slate-400">Page {page} of {totalPages}</p>
+      <div className="flex gap-1">
+        <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+          className="px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-slate-800">Prev</button>
+        <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+          className="px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-slate-800">Next</button>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="space-y-6 animate-slide-up">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-800 dark:text-white">Finance & Contributions</h1>
-          <p className="text-sm text-slate-500 mt-1">Transparent financial management for VOA</p>
-        </div>
-        {canSubmit && !hasPaid && !hasPending && (
-          <button onClick={() => setSubmitModal(true)}
-            className="flex items-center gap-2 bg-[#F97316] hover:bg-[#EA6C0A] text-white font-bold px-5 py-2.5 rounded-xl transition-colors shadow-sm">
-            <Upload className="w-4 h-4" /> Submit Contribution
-          </button>
-        )}
+    <div className="space-y-5 animate-slide-up">
+      <div>
+        <h1 className="page-title text-slate-800 dark:text-white">Finance & Contributions</h1>
+        <p className="text-sm text-slate-500 mt-1">Transparent financial management for VOA</p>
       </div>
-
-      {/* Member contribution status banner */}
-      {canSubmit && (
-        <div className={`rounded-2xl p-5 border ${hasPaid ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : hasPending ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800' : 'bg-[#1E3A8A]/5 dark:bg-[#1E3A8A]/20 border-[#1E3A8A]/20'}`}>
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="flex items-center gap-3">
-              <div className={`p-2.5 rounded-xl ${hasPaid ? 'bg-green-100 dark:bg-green-900/40' : hasPending ? 'bg-amber-100 dark:bg-amber-900/40' : 'bg-[#1E3A8A]/10'}`}>
-                {hasPaid ? <CheckCircle className="w-5 h-5 text-[#22C55E]" /> : hasPending ? <Clock className="w-5 h-5 text-amber-600" /> : <AlertCircle className="w-5 h-5 text-[#1E3A8A]" />}
-              </div>
-              <div>
-                <p className={`font-bold text-sm ${hasPaid ? 'text-[#22C55E]' : hasPending ? 'text-amber-700 dark:text-amber-400' : 'text-[#1E3A8A] dark:text-blue-400'}`}>
-                  {hasPaid ? '✅ Contribution Paid' : hasPending ? '⏳ Awaiting Approval' : '📌 Contribution Due'}
-                </p>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  {hasPaid
-                    ? `₦${myContribution?.amount?.toLocaleString()} paid for ${fmtMonth(month)}${myContribution?.isAboveMinimum ? ` · +₦${myContribution.extraAmount?.toLocaleString()} extra ❤️` : ''}`
-                    : hasPending
-                      ? `₦${myContribution?.amount?.toLocaleString()} submitted — waiting for treasurer approval`
-                      : `Required: ₦${minimum.toLocaleString()} (${me?.gender || 'standard'} rate) for ${fmtMonth(month)}`}
-                </p>
-              </div>
-            </div>
-            {!hasPaid && !hasPending && minimum > 0 && (
-              <button onClick={() => setSubmitModal(true)}
-                className="flex items-center gap-2 bg-[#F97316] hover:bg-[#EA6C0A] text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors">
-                <Upload className="w-3.5 h-3.5" /> Pay Now
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Transparency stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard title="Total Collected" value={formatCurrency(summary?.totalAmount ?? 0)} icon={Wallet} color="green" subtitle={fmtMonth(month)} />
-        <StatCard title="Paid Members" value={summary?.approved ?? 0} icon={Users} color="blue" />
-        <StatCard title="Pending" value={summary?.pending ?? 0} icon={Clock} color="orange" />
-        <StatCard title="Top Supporters" value={summary?.topSupportersCount ?? 0} icon={Heart} color="red" subtitle="Above minimum" />
-      </div>
-
-      {/* Extra contributions highlight */}
-      {(summary?.totalExtraContributions ?? 0) > 0 && (
-        <div className="bg-gradient-to-r from-[#F97316]/10 to-[#F97316]/5 dark:from-[#F97316]/20 dark:to-transparent rounded-2xl p-4 border border-[#F97316]/20 flex items-center gap-3">
-          <Heart className="w-5 h-5 text-[#F97316] shrink-0" />
-          <div>
-            <p className="text-sm font-bold text-[#F97316]">Extra Contributions This Month</p>
-            <p className="text-xs text-slate-500 mt-0.5">
-              {summary?.topSupportersCount} member{summary?.topSupportersCount !== 1 ? 's' : ''} contributed above minimum — total extra: <strong className="text-[#F97316]">{formatCurrency(summary?.totalExtraContributions ?? 0)}</strong>
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Account cards */}
-      {accounts.filter(a => a.isActive).length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-[#1E3A8A]" /> Payment Accounts
-            </h2>
-            {canManageAccounts && (
-              <button onClick={() => { setAccountModal(true); setEditAccount(null); setAccForm({ accountName: '', bankName: '', accountNumber: '', accountHolderName: '' }); }}
-                className="flex items-center gap-1.5 text-xs font-semibold text-[#1E3A8A] dark:text-blue-400 hover:underline">
-                <Plus className="w-3.5 h-3.5" /> Add Account
-              </button>
-            )}
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {accounts.filter(a => a.isActive).map(acc => (
-              <div key={acc._id} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="p-2.5 bg-[#1E3A8A]/10 rounded-xl"><Building2 className="w-5 h-5 text-[#1E3A8A]" /></div>
-                  <Badge variant="success">Active</Badge>
-                </div>
-                <p className="font-extrabold text-slate-800 dark:text-white">{acc.accountName}</p>
-                <p className="text-sm text-slate-500 mt-0.5">{acc.bankName}</p>
-                <div className="mt-3 flex items-center justify-between bg-slate-50 dark:bg-slate-800 rounded-xl px-3 py-2">
-                  <span className="font-mono text-sm font-bold text-slate-700 dark:text-slate-300">{acc.accountNumber}</span>
-                  <button onClick={() => { navigator.clipboard.writeText(acc.accountNumber); toast.success('Copied!'); }}
-                    className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-                    <Copy className="w-3.5 h-3.5 text-slate-400" />
-                  </button>
-                </div>
-                <p className="text-xs text-slate-400 mt-2">Holder: {acc.accountHolderName}</p>
-                {canManageAccounts && (
-                  <button onClick={() => { setEditAccount(acc); setAccForm({ accountName: acc.accountName, bankName: acc.bankName, accountNumber: acc.accountNumber, accountHolderName: acc.accountHolderName }); setAccountModal(true); }}
-                    className="mt-3 text-xs font-semibold text-slate-500 hover:text-[#1E3A8A] dark:hover:text-blue-400 transition-colors">Edit</button>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-slate-100 dark:bg-slate-800/60 rounded-2xl p-1.5">
-        {([
-          { id: 'contributions', label: 'Contributions', icon: Wallet },
-          ...(canViewAll ? [{ id: 'transactions', label: 'Transactions', icon: DollarSign }] : []),
-          ...(canManageAccounts ? [{ id: 'accounts', label: 'All Accounts', icon: Building2 }] : []),
-        ] as { id: Tab; label: string; icon: React.ElementType }[]).map(({ id, label, icon: Icon }) => (
-          <button key={id} onClick={() => setTab(id)}
-            className={cn('flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all flex-1 justify-center',
+      <div className="flex gap-1 overflow-x-auto bg-slate-100 dark:bg-slate-800/60 rounded-2xl p-1.5">
+        {tabs.map(({ id, label }) => (
+          <button key={id} onClick={() => { setTab(id); setPage(1); }}
+            className={cn('flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all flex-1 justify-center',
               tab === id ? 'bg-white dark:bg-slate-900 text-[#1E3A8A] dark:text-blue-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300')}>
-            <Icon className="w-4 h-4" /><span className="hidden sm:inline">{label}</span>
+            {label}
           </button>
         ))}
       </div>
 
-      {tab === 'contributions' && (
-        <Card>
-          <CardHeader>
-            <div className="flex flex-wrap gap-3 items-center justify-between">
-              <CardTitle>Contribution Records</CardTitle>
-              <div className="flex gap-2 flex-wrap">
-                <input type="month" value={month} onChange={e => { setMonth(e.target.value); setPage(1); }}
-                  className="px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/30" />
-                {isTreasurer && (
-                  <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
-                    className="px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/30">
-                    <option value="">All Status</option>
-                    <option value="pending">Pending</option>
-                    <option value="approved">Approved</option>
-                    <option value="rejected">Rejected</option>
-                  </select>
-                )}
-              </div>
+      {/* My Contribution */}
+      {tab === 'my_contribution' && <ContributionPanel />}
+
+      {/* Monthly Records (Treasurer) */}
+      {tab === 'all_records' && isTreasurer && (
+        <div className="space-y-4">
+          {filterBar}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+            <div className="divide-y divide-slate-50 dark:divide-slate-800/60">
+              {loading ? Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="px-5 py-4 flex gap-4">
+                  <div className="skeleton h-10 w-10 rounded-full shrink-0" />
+                  <div className="flex-1 space-y-2"><div className="skeleton h-4 w-40" /><div className="skeleton h-3 w-24" /></div>
+                </div>
+              )) : allRecords.length === 0 ? (
+                <div className="py-12 text-center text-slate-400 text-sm">No records found</div>
+              ) : allRecords.map(r => {
+                const isExpanded = expandedRecord === r._id;
+                const isParent = r.userId?.membershipType === 'parent_guardian';
+                return (
+                  <div key={r._id}>
+                    <div className="px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                      <div className="flex items-center gap-4 flex-wrap">
+                        {/* Member info */}
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className="w-9 h-9 rounded-full bg-[#1E3A8A]/10 flex items-center justify-center text-[#1E3A8A] font-bold text-sm shrink-0">
+                            {r.userId?.fullName?.charAt(0) || '?'}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-semibold text-sm text-slate-800 dark:text-white truncate">{r.userId?.fullName}</p>
+                            <p className="text-xs text-slate-400 capitalize flex items-center gap-1">
+                              {isParent && <Baby className="w-3 h-3 text-[#F97316]" />}
+                              {membershipTypeLabel(r.userId?.membershipType)}
+                              {r.userId?.gender ? ` · ${r.userId.gender}` : ''}
+                              {r.userId?.dob ? ` · age ${calcAge(r.userId.dob)}` : ''}
+                            </p>
+                          </div>
+                        </div>
+                        {/* Amounts */}
+                        <div className="flex items-center gap-4 text-sm flex-wrap">
+                          <div className="text-center">
+                            <p className="text-[10px] text-slate-400 uppercase tracking-wider">Required</p>
+                            <p className="font-bold text-slate-700 dark:text-slate-300">{formatCurrency(r.requiredAmount)}</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-[10px] text-slate-400 uppercase tracking-wider">Paid</p>
+                            <p className="font-bold text-[#22C55E]">{formatCurrency(r.amountPaid)}</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-[10px] text-slate-400 uppercase tracking-wider">Remaining</p>
+                            <p className={cn('font-bold', r.isCompleted ? 'text-[#22C55E]' : 'text-[#F97316]')}>
+                              {r.isCompleted ? '✅ Done' : formatCurrency(r.remainingAmount)}
+                            </p>
+                          </div>
+                          {(r.extraAmount ?? 0) > 0 && (
+                            <div className="text-center">
+                              <p className="text-[10px] text-slate-400 uppercase tracking-wider">Extra</p>
+                              <p className="font-bold text-purple-600 flex items-center gap-0.5"><Heart className="w-3 h-3" />{formatCurrency(r.extraAmount)}</p>
+                            </div>
+                          )}
+                        </div>
+                        {/* Progress */}
+                        <div className="w-24 shrink-0">
+                          <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                            <div className={cn('h-full rounded-full', r.isCompleted ? 'bg-[#22C55E]' : 'bg-[#1E3A8A]')}
+                              style={{ width: `${Math.min(100, r.progressPercent)}%` }} />
+                          </div>
+                          <p className="text-[10px] text-slate-400 mt-0.5 text-right">{r.progressPercent}%</p>
+                        </div>
+                        {/* Expand for parent breakdown */}
+                        {isParent && r.breakdown && r.breakdown.length > 0 && (
+                          <button onClick={() => setExpandedRecord(isExpanded ? null : r._id)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    {/* Parent breakdown expanded */}
+                    {isExpanded && isParent && r.breakdown && (
+                      <div className="px-5 pb-4 bg-slate-50/60 dark:bg-slate-800/30 border-t border-slate-100 dark:border-slate-800">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-3 mb-2 flex items-center gap-1">
+                          <Baby className="w-3 h-3 text-[#F97316]" /> Children Breakdown
+                        </p>
+                        <div className="space-y-1.5">
+                          {r.breakdown.map((b: { childName?: string; childAge?: number; childGender?: string; category: string; amount: number }, i: number) => (
+                            <div key={i} className="flex items-center justify-between text-xs bg-white dark:bg-slate-900 rounded-lg px-3 py-2 border border-slate-200 dark:border-slate-700">
+                              <span className="text-slate-600 dark:text-slate-400">
+                                {b.childName || `Child ${i + 1}`}
+                                {b.childAge !== undefined ? ` (age ${b.childAge})` : ''}
+                                {b.childGender ? ` · ${b.childGender}` : ''}
+                                {' — '}<span className="capitalize">{b.category?.replace(/_/g, ' ')}</span>
+                              </span>
+                              <span className="font-bold text-slate-700 dark:text-slate-300">{formatCurrency(b.amount)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-          </CardHeader>
-          <Table columns={contribColumns} data={contributions} loading={loading} emptyMessage="No contributions found" />
-          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
-        </Card>
+            {pagination}
+          </div>
+        </div>
       )}
 
-      {tab === 'transactions' && canViewAll && (
-        <Card>
-          <CardHeader><CardTitle>Transactions</CardTitle></CardHeader>
-          <Table columns={[
-            { key: 'title', header: 'Title', render: (t: Transaction) => <p className="font-medium text-sm text-slate-800 dark:text-white">{t.title}</p> },
-            { key: 'amount', header: 'Amount', render: (t: Transaction) => <span className={`font-bold text-sm ${t.type === 'income' ? 'text-[#22C55E]' : 'text-red-500'}`}>{t.type === 'income' ? '+' : '-'}₦{t.amount?.toLocaleString()}</span> },
-            { key: 'type', header: 'Type', render: (t: Transaction) => <Badge variant={statusBadge(t.type)}>{t.type}</Badge> },
-            { key: 'status', header: 'Status', render: (t: Transaction) => <Badge variant={statusBadge(t.status)}>{t.status}</Badge> },
-            { key: 'date', header: 'Date', render: (t: Transaction) => <span className="text-xs text-slate-400">{formatDate(t.createdAt)}</span> },
-          ]} data={transactions} loading={loading} emptyMessage="No transactions" />
-        </Card>
+      {/* Installments / Payments (Treasurer) */}
+      {tab === 'installments' && isTreasurer && (
+        <div className="space-y-4">
+          {filterBar}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+            <div className="divide-y divide-slate-50 dark:divide-slate-800/60">
+              {loading ? Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="px-5 py-4 flex gap-4">
+                  <div className="skeleton h-10 w-10 rounded-full shrink-0" />
+                  <div className="flex-1 space-y-2"><div className="skeleton h-4 w-40" /><div className="skeleton h-3 w-24" /></div>
+                </div>
+              )) : allInstallments.length === 0 ? (
+                <div className="py-12 text-center text-slate-400 text-sm">No payments found</div>
+              ) : allInstallments.map(inst => (
+                <div key={inst._id} className="px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="w-9 h-9 rounded-full bg-[#F97316]/10 flex items-center justify-center text-[#F97316] font-bold text-sm shrink-0">
+                        {(inst.userId as { fullName?: string })?.fullName?.charAt(0) || '?'}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-sm text-slate-800 dark:text-white truncate">{(inst.userId as { fullName?: string })?.fullName}</p>
+                        <p className="text-xs text-slate-400 capitalize">
+                          {membershipTypeLabel((inst.userId as { membershipType?: string })?.membershipType)}
+                          {' · '}{inst.paymentMethod?.replace(/_/g, ' ')}
+                          {' · '}{formatDate(inst.createdAt)}
+                        </p>
+                        {inst.referenceNote && <p className="text-xs text-slate-400 mt-0.5">Ref: {inst.referenceNote}</p>}
+                        {inst.isExtraPayment && <p className="text-xs text-purple-600 font-semibold flex items-center gap-1 mt-0.5"><Heart className="w-3 h-3" /> Extra payment</p>}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <div className="text-right">
+                        <p className="font-extrabold text-slate-800 dark:text-white">{formatCurrency(inst.amount)}</p>
+                        <p className="text-xs text-slate-400">{fmtMonth(inst.month)}</p>
+                      </div>
+                      {inst.proofImage && (
+                        <a href={inst.proofImage} target="_blank" rel="noopener noreferrer"
+                          className="text-xs text-[#1E3A8A] dark:text-blue-400 hover:underline font-semibold">View Proof</a>
+                      )}
+                      {inst.receiptNumber && <span className="text-[10px] font-mono text-slate-400">{inst.receiptNumber}</span>}
+                      <span className={cn('text-xs font-bold px-2.5 py-1 rounded-full',
+                        inst.status === 'approved' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                        inst.status === 'rejected' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                        'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400')}>
+                        {inst.status}
+                      </span>
+                      {inst.status === 'pending' && (
+                        <div className="flex gap-1.5">
+                          <button onClick={() => handleApprove(inst._id)}
+                            className="flex items-center gap-1 bg-[#22C55E] hover:bg-[#16a34a] text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors">
+                            <CheckCircle className="w-3.5 h-3.5" /> Approve
+                          </button>
+                          <button onClick={() => { setRejectModal(inst); setRejectReason(''); }}
+                            className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors">
+                            <XCircle className="w-3.5 h-3.5" /> Reject
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {pagination}
+          </div>
+        </div>
       )}
 
+      {/* Accounts */}
       {tab === 'accounts' && canManageAccounts && (
         <div className="space-y-3">
+          <div className="flex justify-end">
+            <button onClick={() => { setAccountModal(true); setEditAccount(null); setAccForm({ accountName: '', bankName: '', accountNumber: '', accountHolderName: '' }); }}
+              className="flex items-center gap-2 bg-[#1E3A8A] hover:bg-[#1e3480] text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors">
+              <Plus className="w-4 h-4" /> Add Account
+            </button>
+          </div>
+          {accounts.length === 0 && !loading && (
+            <div className="text-center py-12 text-slate-400 text-sm">No accounts added yet</div>
+          )}
           {accounts.map(acc => (
             <div key={acc._id} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 flex items-center justify-between gap-4 shadow-sm">
-              <div className="flex items-center gap-4">
-                <div className="p-2.5 bg-[#1E3A8A]/10 rounded-xl"><Building2 className="w-5 h-5 text-[#1E3A8A]" /></div>
-                <div>
-                  <p className="font-bold text-slate-800 dark:text-white">{acc.accountName}</p>
-                  <p className="text-xs text-slate-400">{acc.bankName} · {acc.accountNumber} · {acc.accountHolderName}</p>
-                </div>
+              <div>
+                <p className="font-bold text-slate-800 dark:text-white">{acc.accountName}</p>
+                <p className="text-xs text-slate-400">{acc.bankName} · {acc.accountNumber} · {acc.accountHolderName}</p>
               </div>
-              <div className="flex items-center gap-2">
-                <Badge variant={acc.isActive ? 'success' : 'danger'}>{acc.isActive ? 'Active' : 'Inactive'}</Badge>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className={cn('text-xs font-semibold px-2.5 py-0.5 rounded-full',
+                  acc.isActive ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400')}>
+                  {acc.isActive ? 'Active' : 'Inactive'}
+                </span>
                 <button onClick={() => { setEditAccount(acc); setAccForm({ accountName: acc.accountName, bankName: acc.bankName, accountNumber: acc.accountNumber, accountHolderName: acc.accountHolderName }); setAccountModal(true); }}
                   className="text-xs text-[#1E3A8A] dark:text-blue-400 hover:underline font-semibold">Edit</button>
-                <button onClick={async () => { await accountService.update(acc._id, { isActive: !acc.isActive }); load(); }}
+                <button onClick={async () => { await accountService.update(acc._id, { isActive: !acc.isActive }); loadTab(); }}
                   className="text-xs text-slate-500 hover:underline font-semibold">{acc.isActive ? 'Deactivate' : 'Activate'}</button>
               </div>
             </div>
@@ -333,21 +392,33 @@ export default function FinancePage() {
         </div>
       )}
 
-      {/* Submit Modal */}
-      <SubmitContributionModal
-        open={submitModal}
-        onClose={() => setSubmitModal(false)}
-        onSuccess={load}
-        minimum={minimum}
-        gender={me?.gender || 'other'}
-        accounts={accounts}
-        userName={me?.fullName || ''}
-      />
+      {/* Targets */}
+      {tab === 'targets' && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {targets.map(t => (
+            <div key={t._id} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+              <p className="font-bold text-slate-800 dark:text-white">{t.title}</p>
+              <p className="text-xs text-slate-400 capitalize mt-0.5">{t.category}</p>
+              <div className="mt-3 space-y-1 text-sm">
+                <div className="flex justify-between"><span className="text-slate-500">Target</span><span className="font-bold">{formatCurrency(t.targetAmount)}</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">Raised</span><span className="font-bold text-[#22C55E]">{formatCurrency(t.amountRaised)}</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">Remaining</span><span className="font-bold text-[#F97316]">{formatCurrency(t.amountRemaining)}</span></div>
+              </div>
+              <div className="mt-3 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div className="h-full bg-[#1E3A8A] rounded-full" style={{ width: `${Math.min(100, t.progressPercent)}%` }} />
+              </div>
+              <p className="text-xs text-slate-400 mt-1">{t.progressPercent}% funded</p>
+            </div>
+          ))}
+          {targets.length === 0 && !loading && <p className="text-slate-400 text-sm col-span-3 text-center py-8">No active targets</p>}
+        </div>
+      )}
 
       {/* Reject Modal */}
-      <Modal open={!!rejectModal} onClose={() => setRejectModal(null)} title="Reject Contribution" size="sm">
+      <Modal open={!!rejectModal} onClose={() => setRejectModal(null)} title="Reject Payment" size="sm">
         <div className="space-y-4">
-          <Textarea label="Reason for rejection" placeholder="Explain why the proof is invalid..." rows={3} value={rejectReason} onChange={e => setRejectReason(e.target.value)} />
+          <textarea value={rejectReason} onChange={e => setRejectReason(e.target.value)} placeholder="Reason for rejection..." rows={3}
+            className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-sm px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/30 resize-none" />
           <div className="flex gap-3 justify-end">
             <Button variant="outline" onClick={() => setRejectModal(null)}>Cancel</Button>
             <Button variant="danger" onClick={handleReject}>Reject</Button>
@@ -356,20 +427,18 @@ export default function FinancePage() {
       </Modal>
 
       {/* Account Modal */}
-      <Modal open={accountModal} onClose={() => { setAccountModal(false); setEditAccount(null); }} title={editAccount ? 'Edit Account' : 'Add Treasury Account'}>
+      <Modal open={accountModal} onClose={() => { setAccountModal(false); setEditAccount(null); }} title={editAccount ? 'Edit Account' : 'Add Account'}>
         <div className="space-y-4">
-          <Input label="Account Name" placeholder="e.g. Main VOA Account" value={accForm.accountName} onChange={e => setAccForm(f => ({ ...f, accountName: e.target.value }))} />
-          <Input label="Bank Name" placeholder="e.g. First Bank" value={accForm.bankName} onChange={e => setAccForm(f => ({ ...f, bankName: e.target.value }))} />
-          <Input label="Account Number" placeholder="0123456789" value={accForm.accountNumber} onChange={e => setAccForm(f => ({ ...f, accountNumber: e.target.value }))} />
-          <Input label="Account Holder Name" placeholder="VOA Organization" value={accForm.accountHolderName} onChange={e => setAccForm(f => ({ ...f, accountHolderName: e.target.value }))} />
+          <Input label="Account Name" value={accForm.accountName} onChange={e => setAccForm(f => ({ ...f, accountName: e.target.value }))} placeholder="Main VOA Account" />
+          <Input label="Bank Name" value={accForm.bankName} onChange={e => setAccForm(f => ({ ...f, bankName: e.target.value }))} placeholder="First Bank" />
+          <Input label="Account Number" value={accForm.accountNumber} onChange={e => setAccForm(f => ({ ...f, accountNumber: e.target.value }))} placeholder="0123456789" />
+          <Input label="Account Holder" value={accForm.accountHolderName} onChange={e => setAccForm(f => ({ ...f, accountHolderName: e.target.value }))} placeholder="VOA Organization" />
           <div className="flex gap-3 justify-end">
             <Button variant="outline" onClick={() => { setAccountModal(false); setEditAccount(null); }}>Cancel</Button>
-            <Button onClick={handleSaveAccount} loading={submitting}>{editAccount ? 'Update' : 'Add'} Account</Button>
+            <Button onClick={handleSaveAccount} loading={submitting}>{editAccount ? 'Update' : 'Add'}</Button>
           </div>
         </div>
       </Modal>
-
-      {receiptModal && <ReceiptModal contribution={receiptModal} open={!!receiptModal} onClose={() => setReceiptModal(null)} />}
     </div>
   );
 }

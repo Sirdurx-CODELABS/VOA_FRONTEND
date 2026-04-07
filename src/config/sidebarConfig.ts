@@ -1,7 +1,8 @@
 import {
   LayoutDashboard, Users, Calendar, ClipboardCheck, DollarSign,
   FileText, Megaphone, Heart, BarChart2, Bell, Settings,
-  BookOpen, ShieldCheck, ClipboardList, GitBranch, Briefcase,
+  BookOpen, ShieldCheck, ClipboardList, GitBranch, Briefcase, Target,
+  Activity, Image,
 } from 'lucide-react';
 import { Permission, PERMISSIONS } from '@/lib/permissions';
 import { Role } from '@/types';
@@ -53,28 +54,52 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
     ],
   },
 
-  // ── PROGRAMS ──────────────────────────────────────────────────────────────
+  // ── PROGRAMS — only for authorized roles ─────────────────────────────────
   {
     id: 'programs',
     label: 'Programs',
     icon: Calendar,
-    permission: PERMISSIONS.VIEW_PROGRAMS,
+    permission: PERMISSIONS.MANAGE_PROGRAMS,
     section: 'Operations',
+    roles: ['super_admin', 'chairman', 'vice_chairman', 'secretary', 'program_coordinator'],
     children: [
       { label: 'All Programs',   href: '/dashboard/programs',               permission: PERMISSIONS.VIEW_PROGRAMS },
       { label: 'Create Program', href: '/dashboard/programs?action=create', permission: PERMISSIONS.MANAGE_PROGRAMS },
-      { label: 'Assigned to Me', href: '/dashboard/programs?filter=mine',   alwaysShow: true },
+    ],
+  },
+
+  // ── ACTIVITIES ────────────────────────────────────────────────────────────
+  {
+    id: 'activities',
+    label: 'Activities',
+    icon: Activity,
+    alwaysShow: true,
+    section: 'Operations',
+    children: [
+      { label: 'All Activities',   href: '/dashboard/activities',               alwaysShow: true },
+      { label: 'My Invitations',   href: '/dashboard/activities?view=mine',     alwaysShow: true },
+      { label: 'Create Activity',  href: '/dashboard/activities?action=create', roles: ['super_admin', 'chairman', 'vice_chairman', 'secretary', 'program_coordinator'] as Role[] },
     ],
   },
   {
     id: 'attendance',
     label: 'Attendance',
     icon: ClipboardCheck,
-    permission: PERMISSIONS.VIEW_ATTENDANCE,
+    alwaysShow: true,
     children: [
-      { label: 'Record Attendance', href: '/dashboard/attendance',            permission: PERMISSIONS.MANAGE_ATTENDANCE },
-      { label: 'My Attendance',     href: '/dashboard/attendance?view=me',    alwaysShow: true },
+      { label: 'My Attendance',     href: '/dashboard/attendance',            alwaysShow: true },
+      { label: 'Manage Attendance', href: '/dashboard/attendance?view=admin', permission: PERMISSIONS.MANAGE_ATTENDANCE },
     ],
+  },
+
+  // ── GALLERY ───────────────────────────────────────────────────────────────
+  {
+    id: 'gallery',
+    label: 'VOA Gallery',
+    href: '/dashboard/gallery',
+    icon: Image,
+    alwaysShow: true,
+    section: 'Community',
   },
 
   // ── FINANCE ───────────────────────────────────────────────────────────────
@@ -82,7 +107,7 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
     id: 'finance',
     label: 'Finance',
     icon: DollarSign,
-    permission: PERMISSIONS.VIEW_ACCOUNTS as Permission,  // all roles with view_accounts see Finance
+    permission: PERMISSIONS.VIEW_ACCOUNTS as Permission,
     section: 'Finance',
     badgeKey: 'pendingTransactions',
     children: [
@@ -90,6 +115,13 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
       { label: 'Transactions',    href: '/dashboard/finance?tab=transactions',   permission: PERMISSIONS.VIEW_FINANCE },
       { label: 'Accounts',        href: '/dashboard/finance?tab=accounts',       permission: PERMISSIONS.MANAGE_ACCOUNTS as Permission },
     ],
+  },
+  {
+    id: 'targets',
+    label: 'Finance Targets',
+    href: '/dashboard/targets',
+    icon: Target,
+    permission: PERMISSIONS.VIEW_FINANCE,
   },
 
   // ── CONTENT ───────────────────────────────────────────────────────────────

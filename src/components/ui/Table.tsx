@@ -20,13 +20,13 @@ interface TableProps<T> {
 
 export function Table<T extends { _id?: string }>({ columns, data, loading, emptyMessage = 'No data found', emptyIcon, onRowClick }: TableProps<T>) {
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+    <div className="table-scroll">
+      <table className="w-full text-sm min-w-[500px]">
         <thead>
           <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40">
             {columns.map((col) => (
               <th key={col.key} className={cn(
-                'px-5 py-3.5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider',
+                'px-3 lg:px-5 py-3 text-left text-[10px] lg:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap',
                 col.className
               )}>
                 {col.header}
@@ -39,7 +39,7 @@ export function Table<T extends { _id?: string }>({ columns, data, loading, empt
             Array.from({ length: 5 }).map((_, i) => (
               <tr key={i}>
                 {columns.map((col) => (
-                  <td key={col.key} className="px-5 py-4">
+                  <td key={col.key} className="px-3 lg:px-5 py-3">
                     <div className="skeleton h-4 w-full" />
                   </td>
                 ))}
@@ -47,7 +47,7 @@ export function Table<T extends { _id?: string }>({ columns, data, loading, empt
             ))
           ) : data.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="px-5 py-16 text-center">
+              <td colSpan={columns.length} className="px-5 py-12 text-center">
                 {emptyIcon && <div className="flex justify-center mb-3 opacity-30">{emptyIcon}</div>}
                 <p className="text-slate-400 dark:text-slate-600 text-sm">{emptyMessage}</p>
               </td>
@@ -63,7 +63,7 @@ export function Table<T extends { _id?: string }>({ columns, data, loading, empt
                 )}
               >
                 {columns.map((col) => (
-                  <td key={col.key} className={cn('px-5 py-3.5 text-slate-700 dark:text-slate-300', col.className)}>
+                  <td key={col.key} className={cn('px-3 lg:px-5 py-3 text-slate-700 dark:text-slate-300', col.className)}>
                     {col.render ? col.render(row) : String((row as Record<string, unknown>)[col.key] ?? '')}
                   </td>
                 ))}
