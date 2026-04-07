@@ -3,8 +3,36 @@ import { Toaster } from 'react-hot-toast';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'VOA Management System',
-  description: 'Voice of Adolescents — Organization Management Platform',
+  title: {
+    default: 'VOA Management System',
+    template: '%s | VOA',
+  },
+  description: 'Voice of Adolescents — Empowering Voices, Building Futures. Official organization management platform.',
+  keywords: ['VOA', 'Voice of Adolescents', 'youth organization', 'management system'],
+  authors: [{ name: 'Voice of Adolescents' }],
+  creator: 'Voice of Adolescents',
+  publisher: 'Voice of Adolescents',
+  icons: {
+    icon: [
+      { url: '/voa-logo.svg', type: 'image/svg+xml' },
+      { url: '/voa-logo.png', type: 'image/png' },
+    ],
+    apple: '/voa-logo.png',
+    shortcut: '/voa-logo.png',
+  },
+  openGraph: {
+    title: 'VOA Management System',
+    description: 'Voice of Adolescents — Empowering Voices, Building Futures.',
+    siteName: 'VOA Management System',
+    images: [{ url: '/voa-logo.png', width: 512, height: 512, alt: 'VOA Logo' }],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'VOA Management System',
+    description: 'Voice of Adolescents — Empowering Voices, Building Futures.',
+    images: ['/voa-logo.png'],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -6,7 +6,7 @@ import { useUIStore } from '@/store/uiStore';
 import { Sidebar } from './Sidebar';
 import { Navbar } from './Navbar';
 import { cn } from '@/lib/utils';
-import { Loader2 } from 'lucide-react';
+import Image from 'next/image';
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -24,12 +24,23 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   if (!_hydrated) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-[#0F172A] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-[#1E3A8A] flex items-center justify-center shadow-lg">
-            <span className="text-white font-extrabold text-lg">V</span>
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <Image
+              src="/voa-logo.svg"
+              alt="VOA Logo"
+              width={72}
+              height={72}
+              priority
+              className="animate-pulse"
+            />
           </div>
-          <Loader2 className="w-5 h-5 text-[#1E3A8A] animate-spin" />
-          <p className="text-xs text-slate-400 font-medium">Loading VOA System...</p>
+          <div className="flex items-center gap-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#1E3A8A] animate-bounce" style={{ animationDelay: '0ms' }} />
+            <div className="w-1.5 h-1.5 rounded-full bg-[#F97316] animate-bounce" style={{ animationDelay: '150ms' }} />
+            <div className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-bounce" style={{ animationDelay: '300ms' }} />
+          </div>
+          <p className="text-xs text-slate-400 font-medium tracking-wide">Loading VOA System...</p>
         </div>
       </div>
     );
