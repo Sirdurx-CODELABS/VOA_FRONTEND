@@ -24,6 +24,10 @@ export interface User {
   membershipType?: 'adolescent' | 'adult' | 'parent_guardian';
   interests?: string[];
   points?: number;
+  totalPoints?: number;
+  isFoundingMember?: boolean;
+  foundingMemberRank?: number | null;
+  earlyContributorBonusAwarded?: boolean;
   permissions?: string[];
   reportsTo?: User | string;
   createdAt: string;
