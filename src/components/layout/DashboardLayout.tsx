@@ -6,7 +6,7 @@ import { useUIStore } from '@/store/uiStore';
 import { Sidebar } from './Sidebar';
 import { Navbar } from './Navbar';
 import { cn } from '@/lib/utils';
-import Image from 'next/image';
+import { VOALogoSVG } from '@/components/ui/VOALogo';
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -25,15 +25,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-[#0F172A] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="relative">
-            <Image
-              src="/voa-logo.svg"
-              alt="VOA Logo"
-              width={72}
-              height={72}
-              priority
-              className="animate-pulse"
-            />
+          <div className="animate-pulse">
+            <VOALogoSVG size={72} />
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full bg-[#1E3A8A] animate-bounce" style={{ animationDelay: '0ms' }} />
