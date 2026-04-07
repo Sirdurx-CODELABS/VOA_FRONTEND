@@ -11,7 +11,7 @@ import { Select } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
 import { formatDate, getInitials, cn } from '@/lib/utils';
 import { calcAge, formatDOB, membershipTypeLabel } from '@/lib/utils';
-import { Search, CheckCircle, XCircle, Shield, Clock, Users } from 'lucide-react';
+import { Search, CheckCircle, XCircle, Shield, Clock, Users, UserCheck } from 'lucide-react';
 import { hasPermission, PERMISSIONS, ASSIGNABLE_ROLES, canAssignRole } from '@/lib/permissions';
 import toast from 'react-hot-toast';
 
@@ -68,6 +68,17 @@ export default function UsersPage() {
       toast.success('Account rejected');
       load();
     } catch { toast.error('Failed'); }
+  };
+
+  const handleActivate = async (id: string, name: string) => {
+    if (!confirm(`Reactivate ${name}'s account?`)) return;
+    try {
+      await userService.activate(id);
+      toast.success(`${name}'s account has been reactivated`);
+      load();
+    } catch (e: unknown) {
+      toast.error((e as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed');
+    }
   };
 
   const handleAssignRole = async () => {
@@ -155,6 +166,15 @@ export default function UsersPage() {
                 <XCircle className="w-3.5 h-3.5" /> Reject
               </button>
             </>
+          )}
+          {/* Inactive accounts — show Activate */}
+          {u.status === 'inactive' && canManage && (
+            <button
+              onClick={() => handleActivate(u._id, u.fullName)}
+              className="flex items-center gap-1 text-xs font-semibold text-[#1E3A8A] dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2 py-1 rounded-lg transition-colors"
+              title="Reactivate account">
+              <UserCheck className="w-3.5 h-3.5" /> Activate
+            </button>
           )}
           {/* Active accounts — show role assignment */}
           {u.status === 'active' && canAssign && canAssignRole(me?.role || 'member', u.role) && (

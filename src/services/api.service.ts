@@ -7,6 +7,7 @@ export const userService = {
   updateMyProfile: (data: object) => api.put('/users/me/profile', data),
   approve: (id: string, data?: { role?: string; isVice?: boolean }) => api.patch(`/users/${id}/approve`, data || {}),
   reject: (id: string) => api.patch(`/users/${id}/reject`),
+  activate: (id: string) => api.patch(`/users/${id}/activate`),
   assignRole: (id: string, data: object) => api.patch(`/users/${id}/assign-role`, data),
   delete: (id: string) => api.delete(`/users/${id}`),
   uploadProfileImage: (file: File) => {
