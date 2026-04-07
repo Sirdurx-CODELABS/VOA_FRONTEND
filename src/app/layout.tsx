@@ -24,14 +24,14 @@ export const metadata: Metadata = {
     title: 'VOA Management System',
     description: 'Voice of Adolescents — Empowering Voices, Building Futures.',
     siteName: 'VOA Management System',
-    images: [{ url: '/voa-logo.png', width: 512, height: 512, alt: 'VOA Logo' }],
+    images: [{ url: 'https://res.cloudinary.com/dvqfrm6rc/image/upload/v1775567811/VOA_LOGO_jriqh6.png', width: 512, height: 512, alt: 'VOA Logo' }],
     type: 'website',
   },
   twitter: {
     card: 'summary',
     title: 'VOA Management System',
     description: 'Voice of Adolescents — Empowering Voices, Building Futures.',
-    images: ['/voa-logo.png'],
+    images: ['https://res.cloudinary.com/dvqfrm6rc/image/upload/v1775567811/VOA_LOGO_jriqh6.png'],
   },
 };
 
