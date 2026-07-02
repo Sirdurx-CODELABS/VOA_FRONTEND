@@ -9,7 +9,7 @@ import { hasPermission, PERMISSIONS } from '@/lib/permissions';
 import { VOALogo } from '@/components/ui/VOALogo';
 import { Avatar } from '@/components/ui/Avatar';
 import { SIDEBAR_CONFIG, SidebarItem, SidebarChild } from '@/config/sidebarConfig';
-import { notificationService } from '@/services/api.service';
+import { notificationService, documentApprovalService } from '@/services/api.service';
 import { User } from '@/types';
 import toast from 'react-hot-toast';
 import {
@@ -197,12 +197,18 @@ export function Sidebar() {
   const fetchBadges = useCallback(async () => {
     if (!user) return;
     try {
-      const [notifRes] = await Promise.allSettled([
+      const [notifRes, approvalRes] = await Promise.allSettled([
         notificationService.getUnreadCount(),
+        documentApprovalService.getPendingCount(),
       ]);
+      const counts: Record<string, number> = {};
       if (notifRes.status === 'fulfilled') {
-        setBadgeCounts({ unreadNotifications: notifRes.value.data.data.count });
+        counts.unreadNotifications = notifRes.value.data.data.count;
       }
+      if (approvalRes.status === 'fulfilled') {
+        counts.pendingApprovals = approvalRes.value.data.data.count;
+      }
+      setBadgeCounts(counts);
     } catch {}
   }, [user, setBadgeCounts]);
 

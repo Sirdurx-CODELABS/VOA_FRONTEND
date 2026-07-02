@@ -34,17 +34,32 @@ export interface User {
   updatedAt: string;
 }
 
+export interface JoinRequest {
+  _id: string;
+  user?: User;
+  name: string;
+  email: string;
+  phone?: string;
+  message?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  requestedAt: string;
+}
+
 export interface Program {
   _id: string;
   title: string;
   description?: string;
+  images: string[];
   createdBy: User;
   assignedMembers: User[];
+  joinRequests: JoinRequest[];
   date: string;
   endDate?: string;
   status: 'upcoming' | 'ongoing' | 'completed';
   budget?: number;
   venue?: string;
+  tags?: string[];
+  isPublic: boolean;
   createdAt: string;
 }
 
@@ -178,6 +193,98 @@ export interface TreasuryAccount {
   createdAt: string;
 }
 
+export interface Blog {
+  _id: string;
+  title: string;
+  slug: string;
+  content: string;
+  image?: string;
+  category?: string;
+  author: User;
+  featured: boolean;
+  status: 'draft' | 'published';
+  readTime?: number;
+  views?: number;
+  isPublic: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Event {
+  _id: string;
+  title: string;
+  description?: string;
+  date: string;
+  endDate?: string;
+  time?: string;
+  location?: string;
+  category?: string;
+  image?: string;
+  images?: string[];
+  status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
+  seats?: number;
+  registered?: number;
+  attendees?: User[];
+  createdBy: User;
+  isPublic: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Project {
+  _id: string;
+  title: string;
+  description?: string;
+  shortDescription?: string;
+  image?: string;
+  images?: string[];
+  category?: string;
+  status: 'planning' | 'ongoing' | 'completed' | 'on-hold';
+  startDate?: string;
+  endDate?: string;
+  budget?: number;
+  location?: string;
+  createdBy: User;
+  isPublic: boolean;
+  impact?: string;
+  features?: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ContactReply {
+  _id: string;
+  content: string;
+  createdBy: User;
+  createdAt: string;
+}
+
+export interface ContactMessage {
+  _id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+  status: 'new' | 'in-progress' | 'replied' | 'closed';
+  replies: ContactReply[];
+  user?: User;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TeamMember {
+  _id: string;
+  user: User;
+  position: string;
+  bio?: string;
+  photo?: string;
+  order: number;
+  isPublic: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Contribution {
   _id: string;
   userId: User;
@@ -295,4 +402,124 @@ export interface TreasuryAccount {
   isActive: boolean;
   createdBy: User;
   createdAt: string;
+}
+
+export interface Blog {
+  _id: string;
+  title: string;
+  slug: string;
+  content: string;
+  image?: string;
+  category?: string;
+  author: User;
+  featured: boolean;
+  status: 'draft' | 'published';
+  readTime?: number;
+  views?: number;
+  isPublic: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Event {
+  _id: string;
+  title: string;
+  description?: string;
+  date: string;
+  endDate?: string;
+  time?: string;
+  location?: string;
+  category?: string;
+  image?: string;
+  images?: string[];
+  status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
+  seats?: number;
+  registered?: number;
+  attendees?: User[];
+  createdBy: User;
+  isPublic: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Project {
+  _id: string;
+  title: string;
+  description?: string;
+  shortDescription?: string;
+  image?: string;
+  images?: string[];
+  category?: string;
+  status: 'planning' | 'ongoing' | 'completed' | 'on-hold';
+  startDate?: string;
+  endDate?: string;
+  budget?: number;
+  location?: string;
+  createdBy: User;
+  isPublic: boolean;
+  impact?: string;
+  features?: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ContactReply {
+  _id: string;
+  content: string;
+  createdBy: User;
+  createdAt: string;
+}
+
+export interface ContactMessage {
+  _id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+  status: 'new' | 'in-progress' | 'replied' | 'closed';
+  replies: ContactReply[];
+  user?: User;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TeamMember {
+  _id: string;
+  user: User;
+  position: string;
+  bio?: string;
+  photo?: string;
+  order: number;
+  isPublic: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type TemplateType =
+  | 'letterhead' | 'membership_card' | 'meeting_agenda' | 'official_invitation'
+  | 'financial_request' | 'activity_report' | 'official_receipt' | 'mou'
+  | 'email_signature' | 'certificate';
+
+export interface DocumentApproval {
+  _id: string;
+  documentId: {
+    _id: string;
+    name: string;
+    templateType: TemplateType;
+    data: Record<string, unknown>;
+    pdfUrl?: string;
+    status: 'draft' | 'pending_approval' | 'approved' | 'rejected';
+  };
+  templateType: TemplateType;
+  role: string;
+  label: string;
+  requestedBy: { _id: string; fullName: string; email: string; profileImage?: string };
+  assignedTo: { _id: string; fullName: string; email: string; profileImage?: string };
+  status: 'pending' | 'approved' | 'rejected';
+  signatureUrl?: string;
+  comment?: string;
+  actionedAt?: string;
+  createdAt: string;
+  updatedAt: string;
 }

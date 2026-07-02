@@ -2,7 +2,8 @@ import {
   LayoutDashboard, Users, Calendar, ClipboardCheck, DollarSign,
   FileText, Megaphone, Heart, BarChart2, Bell, Settings,
   BookOpen, ShieldCheck, ClipboardList, GitBranch, Briefcase, Target,
-  Activity, Image,
+  Activity, Image, PenTool, MapPin, FolderKanban, UsersRound, Mail, Printer,
+  CheckSquare,
 } from 'lucide-react';
 import { Permission, PERMISSIONS } from '@/lib/permissions';
 import { Role } from '@/types';
@@ -126,6 +127,21 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
 
   // ── CONTENT ───────────────────────────────────────────────────────────────
   {
+    id: 'content',
+    label: 'Content',
+    icon: PenTool,
+    permission: PERMISSIONS.VIEW_BLOGS,
+    section: 'Content',
+    children: [
+      { label: 'Blog', href: '/dashboard/content/blogs', permission: PERMISSIONS.VIEW_BLOGS },
+      { label: 'Events', href: '/dashboard/content/events', permission: PERMISSIONS.VIEW_EVENTS },
+      { label: 'Projects', href: '/dashboard/content/projects', permission: PERMISSIONS.VIEW_PROJECTS },
+      { label: 'Gallery', href: '/dashboard/gallery', permission: PERMISSIONS.VIEW_GALLERY },
+      { label: 'Team', href: '/dashboard/content/team', permission: PERMISSIONS.VIEW_TEAM },
+      { label: 'Contact', href: '/dashboard/content/contact', permission: PERMISSIONS.VIEW_CONTACT },
+    ],
+  },
+  {
     id: 'reports',
     label: 'Reports',
     icon: FileText,
@@ -143,9 +159,9 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
     icon: Megaphone,
     permission: PERMISSIONS.VIEW_ANNOUNCEMENTS,
     children: [
-      { label: 'All Announcements', href: '/dashboard/announcements',                   permission: PERMISSIONS.VIEW_ANNOUNCEMENTS },
-      { label: 'Create Post',       href: '/dashboard/announcements?action=create',     permission: PERMISSIONS.MANAGE_ANNOUNCEMENTS },
-      { label: 'Public Posts',      href: '/dashboard/announcements?visibility=public', alwaysShow: true },
+      { label: 'All Announcements', href: '/dashboard/announcements',                      permission: PERMISSIONS.VIEW_ANNOUNCEMENTS },
+      { label: 'Create Post',         href: '/dashboard/announcements?action=create',        permission: PERMISSIONS.MANAGE_ANNOUNCEMENTS },
+      { label: 'Public Posts',        href: '/dashboard/announcements?visibility=public', alwaysShow: true },
     ],
   },
 
@@ -161,6 +177,25 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
       { label: 'All Requests',   href: '/dashboard/welfare',               permission: PERMISSIONS.MANAGE_WELFARE },
       { label: 'Submit Request', href: '/dashboard/welfare?action=submit', alwaysShow: true },
     ],
+  },
+
+  // ── TASKS & APPROVALS ──────────────────────────────────────────────────────
+  {
+    id: 'document_approvals',
+    label: 'Document Approvals',
+    href: '/dashboard/approvals',
+    icon: CheckSquare,
+    section: 'Tasks',
+    badgeKey: 'pendingApprovals',
+    alwaysShow: true,
+  },
+  {
+    id: 'document_generator',
+    label: 'Document Generator',
+    href: '/dashboard/documents',
+    icon: FileText,
+    section: 'Tasks',
+    roles: ['super_admin', 'chairman'],
   },
 
   // ── WORKFLOW ──────────────────────────────────────────────────────────────
@@ -199,42 +234,17 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
 
   // ── SYSTEM ────────────────────────────────────────────────────────────────
   {
-    id: 'notifications',
-    label: 'Notifications',
-    href: '/dashboard/notifications',
-    icon: Bell,
-    alwaysShow: true,
-    section: 'System',
-    badgeKey: 'unreadNotifications',
-  },
-  {
-    id: 'constitution',
-    label: 'Constitution',
-    href: '/constitution',
-    icon: BookOpen,
-    alwaysShow: true,
-  },
-  {
-    id: 'settings',
-    label: 'Settings',
-    href: '/dashboard/settings',
+    id: 'system',
+    label: 'System',
     icon: Settings,
-    alwaysShow: true,
-  },
-  {
-    id: 'super_admin',
-    label: 'System Control',
-    href: '/dashboard/admin',
-    icon: ShieldCheck,
-    adminOnly: true,
-    section: 'Admin',
-  },
-  {
-    id: 'system_logs',
-    label: 'System Logs',
-    href: '/dashboard/admin?tab=logs',
-    icon: ClipboardList,
-    adminOnly: true,
-    permission: PERMISSIONS.VIEW_SYSTEM_LOGS,
+    section: 'System',
+    children: [
+      { label: 'Notifications', href: '/dashboard/notifications', alwaysShow: true },
+      { label: 'Constitution', href: '/constitution', alwaysShow: true },
+      { label: 'Settings', href: '/dashboard/settings', alwaysShow: true },
+      { label: 'System Control', href: '/dashboard/admin', roles: ['super_admin'] },
+      { label: 'System Logs', href: '/dashboard/admin?tab=logs', roles: ['super_admin'] },
+      { label: 'Document Templates', href: '/dashboard/document-templates', roles: ['super_admin', 'chairman'] },
+    ],
   },
 ];

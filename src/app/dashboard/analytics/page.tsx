@@ -6,7 +6,7 @@ import { StatCard } from '@/components/ui/StatCard';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { getInitials, membershipTypeLabel } from '@/lib/utils';
-import { Users, Calendar, TrendingUp, AlertTriangle, Trophy, Bell, Baby, UserCheck, Clock } from 'lucide-react';
+import { Users, TrendingUp, AlertTriangle, Trophy, Bell, Baby, UserCheck, Clock } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import toast from 'react-hot-toast';
 
@@ -51,8 +51,9 @@ export default function AnalyticsPage() {
   const handleAlertInactive = async () => {
     setAlerting(true);
     try {
-      toast.success('Inactive users alerted');
-    } catch { toast.error('Failed'); }
+      await analyticsService.alertInactiveUsers();
+      toast.success('Inactive users alerted successfully');
+    } catch { toast.error('Failed to alert inactive users'); }
     finally { setAlerting(false); }
   };
 

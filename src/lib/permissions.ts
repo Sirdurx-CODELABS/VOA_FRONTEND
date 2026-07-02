@@ -45,6 +45,19 @@ export const PERMISSIONS = {
   VIEW_CONTRIBUTIONS:           'view_contributions',
   MANAGE_ACCOUNTS:              'manage_accounts',
   VIEW_ACCOUNTS:                'view_accounts',
+  // Content permissions
+  MANAGE_BLOGS:                 'manage_blogs',
+  VIEW_BLOGS:                   'view_blogs',
+  MANAGE_EVENTS:                'manage_events',
+  VIEW_EVENTS:                  'view_events',
+  MANAGE_PROJECTS:              'manage_projects',
+  VIEW_PROJECTS:                'view_projects',
+  MANAGE_GALLERY:               'manage_gallery',
+  VIEW_GALLERY:                 'view_gallery',
+  MANAGE_TEAM:                  'manage_team',
+  VIEW_TEAM:                    'view_team',
+  MANAGE_CONTACT:               'manage_contact',
+  VIEW_CONTACT:                 'view_contact',
 } as const;
 
 export type Permission = typeof PERMISSIONS[keyof typeof PERMISSIONS];
@@ -60,6 +73,13 @@ const ROLE_PERMISSIONS: Record<Role, string[]> = {
     'view_reports', 'manage_announcements', 'manage_welfare', 'view_constitution',
     'edit_own_profile', 'change_own_password', 'generate_own_id_card',
     'view_analytics', 'manage_settings', 'submit_contribution', 'view_contributions', 'view_accounts',
+    // Content permissions
+    'view_blogs', 'manage_blogs',
+    'view_events', 'manage_events',
+    'view_projects', 'manage_projects',
+    'view_gallery', 'manage_gallery',
+    'view_team', 'manage_team',
+    'view_contact', 'manage_contact',
   ],
 
   vice_chairman: [
@@ -68,6 +88,8 @@ const ROLE_PERMISSIONS: Record<Role, string[]> = {
     'edit_own_profile', 'change_own_password', 'generate_own_id_card', 'view_analytics',
     'submit_contribution', 'view_contributions', 'view_accounts',
     'manage_announcements', 'post_executive_announcement', 'post_meeting_announcement',
+    // Content permissions
+    'view_blogs', 'view_events', 'view_projects', 'view_gallery', 'view_team', 'view_contact',
   ],
 
   secretary: [
@@ -75,6 +97,8 @@ const ROLE_PERMISSIONS: Record<Role, string[]> = {
     'view_constitution', 'edit_own_profile', 'change_own_password', 'generate_own_id_card',
     'submit_contribution', 'view_contributions', 'view_accounts',
     'view_announcements', 'manage_announcements', 'post_meeting_announcement',
+    // Content permissions
+    'view_blogs', 'view_events', 'view_projects', 'view_gallery', 'view_team', 'view_contact',
   ],
 
   treasurer: [
@@ -82,6 +106,8 @@ const ROLE_PERMISSIONS: Record<Role, string[]> = {
     'view_constitution', 'edit_own_profile', 'change_own_password', 'generate_own_id_card',
     'submit_contribution', 'manage_contributions', 'view_contributions', 'manage_accounts', 'view_accounts',
     'view_announcements', 'manage_announcements', 'post_finance_announcement',
+    // Content permissions
+    'view_blogs', 'view_events', 'view_projects', 'view_gallery', 'view_team', 'view_contact',
   ],
 
   pro: [
@@ -89,6 +115,12 @@ const ROLE_PERMISSIONS: Record<Role, string[]> = {
     'edit_own_profile', 'change_own_password', 'generate_own_id_card',
     'submit_contribution', 'view_contributions', 'view_accounts',
     'post_publicity_announcement', 'post_meeting_announcement', 'post_program_announcement',
+    // Content permissions
+    'view_blogs', 'manage_blogs',
+    'view_events', 'manage_events',
+    'view_projects', 'manage_projects',
+    'view_gallery', 'manage_gallery',
+    'view_team', 'view_contact',
   ],
 
   program_coordinator: [
@@ -97,6 +129,9 @@ const ROLE_PERMISSIONS: Record<Role, string[]> = {
     'edit_own_profile', 'change_own_password', 'generate_own_id_card',
     'submit_contribution', 'view_contributions', 'view_accounts',
     'view_announcements', 'manage_announcements', 'post_program_announcement',
+    // Content permissions
+    'view_blogs', 'view_events', 'manage_events',
+    'view_projects', 'view_gallery', 'view_team', 'view_contact',
   ],
 
   membership_coordinator: [
@@ -105,6 +140,8 @@ const ROLE_PERMISSIONS: Record<Role, string[]> = {
     'edit_own_profile', 'change_own_password', 'generate_own_id_card', 'view_analytics',
     'submit_contribution', 'view_contributions', 'view_accounts',
     'view_announcements', 'manage_announcements', 'post_membership_announcement',
+    // Content permissions
+    'view_blogs', 'view_events', 'view_projects', 'view_gallery', 'view_team', 'view_contact',
   ],
 
   welfare_officer: [
@@ -112,6 +149,8 @@ const ROLE_PERMISSIONS: Record<Role, string[]> = {
     'edit_own_profile', 'change_own_password', 'generate_own_id_card',
     'submit_contribution', 'view_contributions', 'view_accounts',
     'view_announcements', 'manage_announcements', 'post_welfare_announcement',
+    // Content permissions
+    'view_blogs', 'view_events', 'view_projects', 'view_gallery', 'view_team', 'view_contact',
   ],
 
   member: [
@@ -119,6 +158,8 @@ const ROLE_PERMISSIONS: Record<Role, string[]> = {
     'submit_position_application', 'submit_welfare_request', 'view_constitution',
     'edit_own_profile', 'change_own_password', 'generate_own_id_card',
     'submit_contribution', 'view_contributions', 'view_accounts',
+    // Content permissions
+    'view_blogs', 'view_events', 'view_projects', 'view_gallery', 'view_team',
   ],
 };
 

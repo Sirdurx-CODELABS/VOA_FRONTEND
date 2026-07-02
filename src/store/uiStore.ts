@@ -33,8 +33,8 @@ export const useUIStore = create<UIState>()(
       toggleDarkMode: () => set((s) => ({ darkMode: !s.darkMode })),
       toggleExpanded: (id) => set((s) => ({
         expandedItems: s.expandedItems.includes(id)
-          ? s.expandedItems.filter(i => i !== id)
-          : [...s.expandedItems, id],
+          ? []
+          : [id],
       })),
       setExpanded: (id, open) => set((s) => ({
         expandedItems: open

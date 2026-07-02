@@ -46,10 +46,10 @@ const INTERESTS = [
 /* ── Derive membership from age ─────────────────────────────────────────── */
 function deriveMembership(dob: string, isParent: boolean): { type: string; label: string; icon: string; desc: string } {
   const age = calcAge(dob);
-  if (age === null) return { type: 'adolescent', label: 'Adolescent', icon: '🧒', desc: 'Age 13–25' };
-  if (age <= 25) return { type: 'adolescent', label: 'Adolescent', icon: '🧒', desc: `Age ${age}` };
+  if (age === null || age < 13) return { type: 'adolescent', label: 'Adolescent', icon: '🧒', desc: 'Age 13–24' };
+  if (age <= 24) return { type: 'adolescent', label: 'Adolescent', icon: '🧒', desc: `Age ${age}` };
   if (isParent) return { type: 'parent_guardian', label: 'Parent / Guardian', icon: '👨‍👧', desc: `Age ${age} · with children` };
-  return { type: 'adult', label: 'Adult', icon: '👤', desc: `Age ${age}` };
+  return { type: 'adult', label: 'Adult / Volunteer', icon: '👤', desc: `Age ${age} · 25+ years` };
 }
 
 /* ── Step indicator ──────────────────────────────────────────────────────── */
@@ -125,7 +125,7 @@ export default function RegisterPage() {
   // Derive membership from DOB + parent toggle
   const membership = dob ? deriveMembership(dob, isParentToggle) : null;
   const age = dob ? calcAge(dob) : null;
-  const isAdult = age !== null && age > 25;
+  const isAdult = age !== null && age >= 25;
   const showParentToggle = isAdult;
   const showChildrenSection = isAdult && isParentToggle;
 

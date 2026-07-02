@@ -37,8 +37,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="antialiased" style={{ fontFamily: '"Inter", "Segoe UI", system-ui, -apple-system, sans-serif' }}>
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
+      <body className="antialiased" style={{ fontFamily: '"Inter", "Segoe UI", system-ui, -apple-system, sans-serif' }} suppressHydrationWarning>
         {children}
         <Toaster
           position="top-right"

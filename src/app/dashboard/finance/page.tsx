@@ -15,8 +15,10 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { ContributionPanel } from './_ContributionPanel';
+import { MemberLedger } from './_MemberLedger';
+import { FinanceSummary } from './_FinanceSummary';
 
-type Tab = 'my_contribution' | 'all_records' | 'installments' | 'accounts' | 'targets';
+type Tab = 'my_contribution' | 'member_ledger' | 'all_records' | 'installments' | 'accounts' | 'targets';
 const currentMonth = () => new Date().toISOString().slice(0, 7);
 const fmtMonth = (m: string) => {
   const [y, mo] = m.split('-');
@@ -43,6 +45,7 @@ export default function FinancePage() {
   const [editAccount, setEditAccount] = useState<TreasuryAccount | null>(null);
   const [accForm, setAccForm] = useState({ accountName: '', bankName: '', accountNumber: '', accountHolderName: '' });
   const [submitting, setSubmitting] = useState(false);
+  const [blurAmounts, setBlurAmounts] = useState(false);
 
   const isTreasurer = hasPermission(me, PERMISSIONS.MANAGE_CONTRIBUTIONS);
   const canManageAccounts = hasPermission(me, PERMISSIONS.MANAGE_ACCOUNTS);
@@ -113,6 +116,7 @@ export default function FinancePage() {
   const tabs = [
     { id: 'my_contribution', label: 'My Contribution' },
     ...(isTreasurer ? [
+      { id: 'member_ledger', label: 'Member Ledger' },
       { id: 'all_records', label: 'Monthly Records' },
       { id: 'installments', label: 'Payments' },
     ] : []),
@@ -171,6 +175,13 @@ export default function FinancePage() {
         <p className="text-sm text-slate-500 mt-1">Transparent financial management for VOA</p>
       </div>
 
+      {/* Finance Summary (Treasurer Only) */}
+      {isTreasurer && <FinanceSummary 
+        blurAmounts={blurAmounts} 
+        onToggleBlur={() => setBlurAmounts(!blurAmounts)}
+        onRefresh={() => loadTab()}
+      />}
+
       {/* Tabs */}
       <div className="flex gap-1 overflow-x-auto bg-slate-100 dark:bg-slate-800/60 rounded-2xl p-1.5">
         {tabs.map(({ id, label }) => (
@@ -184,6 +195,9 @@ export default function FinancePage() {
 
       {/* My Contribution */}
       {tab === 'my_contribution' && <ContributionPanel />}
+
+      {/* Member Ledger (Treasurer) */}
+      {tab === 'member_ledger' && isTreasurer && <MemberLedger />}
 
       {/* Monthly Records (Treasurer) */}
       {tab === 'all_records' && isTreasurer && (

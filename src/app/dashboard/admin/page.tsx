@@ -6,13 +6,14 @@ import { superAdminService } from '@/services/api.service';
 import { User } from '@/types';
 import { UsersTab } from './_users';
 import { AuditTab } from './_audit';
+import { SystemInfoTab } from './_systemInfo';
 import { cn } from '@/lib/utils';
 import {
   ShieldCheck, Users, Calendar, DollarSign, Heart,
-  AlertTriangle, ClipboardList, TrendingUp, Activity,
+  AlertTriangle, ClipboardList, TrendingUp, Activity, Info,
 } from 'lucide-react';
 
-type TabId = 'overview' | 'users' | 'programs' | 'transactions' | 'welfare' | 'audit';
+type TabId = 'overview' | 'users' | 'programs' | 'transactions' | 'welfare' | 'audit' | 'systemInfo';
 
 function Tab({ label, icon: Icon, active, badge, onClick }: {
   label: string; icon: React.ElementType; active: boolean; badge?: number; onClick: () => void;
@@ -120,6 +121,7 @@ export default function SuperAdminPage() {
         <Tab label="Overview" icon={ShieldCheck} active={tab === 'overview'} onClick={() => setTab('overview')} />
         <Tab label="Users" icon={Users} active={tab === 'users'} onClick={() => setTab('users')} />
         <Tab label="Audit Log" icon={ClipboardList} active={tab === 'audit'} badge={stats?.totalAuditLogs} onClick={() => setTab('audit')} />
+        <Tab label="System Info" icon={Info} active={tab === 'systemInfo'} onClick={() => setTab('systemInfo')} />
       </div>
 
       {/* Tab content */}
@@ -155,6 +157,8 @@ export default function SuperAdminPage() {
       )}
 
       {tab === 'audit' && <AuditTab />}
+
+      {tab === 'systemInfo' && <SystemInfoTab />}
     </div>
   );
 }

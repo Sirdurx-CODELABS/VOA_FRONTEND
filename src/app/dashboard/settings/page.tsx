@@ -96,7 +96,7 @@ export default function SettingsPage() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const age = calcAge(user?.dob);
-  const isAdult = age !== null && age > 25;
+  const isAdult = age !== null && age >= 25;
   const isParent = user?.membershipType === 'parent_guardian';
 
   // Sync parent toggle with current membership

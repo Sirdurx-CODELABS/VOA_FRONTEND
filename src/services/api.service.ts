@@ -20,10 +20,24 @@ export const userService = {
 export const programService = {
   getAll: (params?: object) => api.get('/programs', { params }),
   getById: (id: string) => api.get(`/programs/${id}`),
-  create: (data: object) => api.post('/programs', data),
-  update: (id: string, data: object) => api.put(`/programs/${id}`, data),
+  create: (data: FormData | object) => {
+    const config = data instanceof FormData 
+      ? { headers: { 'Content-Type': 'multipart/form-data' } } 
+      : undefined;
+    return api.post('/programs', data, config);
+  },
+  update: (id: string, data: FormData | object) => {
+    const config = data instanceof FormData 
+      ? { headers: { 'Content-Type': 'multipart/form-data' } } 
+      : undefined;
+    return api.put(`/programs/${id}`, data, config);
+  },
   delete: (id: string) => api.delete(`/programs/${id}`),
   assignMembers: (id: string, memberIds: string[]) => api.post(`/programs/${id}/assign-members`, { memberIds }),
+  removeMembers: (id: string, memberIds: string[]) => api.post(`/programs/${id}/remove-members`, { memberIds }),
+  getJoinRequests: (id: string) => api.get(`/programs/${id}/join-requests`),
+  updateJoinRequest: (id: string, requestId: string, status: string) => 
+    api.put(`/programs/${id}/join-requests`, { requestId, status }),
 };
 
 export const attendanceService = {
@@ -77,6 +91,7 @@ export const analyticsService = {
   getLeaderboard: (limit?: number) => api.get('/analytics/leaderboard', { params: { limit } }),
   getProgramMetrics: () => api.get('/analytics/programs'),
   getInactiveUsers: () => api.get('/analytics/inactive-users'),
+  alertInactiveUsers: () => api.post('/analytics/alert-inactive'),
 };
 
 export const notificationService = {
@@ -181,6 +196,19 @@ export const pointsService = {
   getMyHistory: () => api.get('/contributions/my-points'),
 };
 
+export const ledgerService = {
+  getDashboardStats: () => api.get('/ledger/dashboard'),
+  getAllLedgers: (params?: object) => api.get('/ledger', { params }),
+  getMemberLedger: (memberId?: string) => memberId ? api.get(`/ledger/member/${memberId}`) : api.get('/ledger/my'),
+  addManualPayment: (data: object) => api.post('/ledger/manual-payment', data),
+  markMonthPaid: (data: object) => api.post('/ledger/mark-month-paid', data),
+  allocatePayment: (data: object) => api.post('/ledger/allocate-payment', data),
+  allocateToTargets: (data: object) => api.post('/ledger/allocate-targets', data),
+  getMemberTargetContributions: (memberId?: string) => memberId ? api.get(`/ledger/target-contributions/${memberId}`) : api.get('/ledger/target-contributions'),
+  generateMonthlyRecords: (data: object) => api.post('/ledger/generate-records', data),
+  exportData: (type: string, format?: string) => api.get('/ledger/export', { params: { type, format } }),
+};
+
 export const activityService = {
   getAll: (params?: object) => api.get('/activities', { params }),
   getById: (id: string) => api.get(`/activities/${id}`),
@@ -197,4 +225,116 @@ export const activityService = {
   uploadMedia: (id: string, data: FormData) => api.post(`/activities/${id}/media`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
   deleteMedia: (mediaId: string) => api.delete(`/activities/media/${mediaId}`),
   getPublicMedia: (token: string) => api.get(`/activities/gallery/public/${token}`),
+};
+
+export const blogService = {
+  getAll: (params?: object) => api.get('/blogs', { params }),
+  getPublicAll: (params?: object) => api.get('/blogs/public/all', { params }),
+  getPublicBySlug: (slug: string) => api.get(`/blogs/public/${slug}`),
+  getById: (id: string) => api.get(`/blogs/${id}`),
+  create: (data: FormData | object) => {
+    const config = data instanceof FormData 
+      ? { headers: { 'Content-Type': 'multipart/form-data' } } 
+      : undefined;
+    return api.post('/blogs', data, config);
+  },
+  update: (id: string, data: FormData | object) => {
+    const config = data instanceof FormData 
+      ? { headers: { 'Content-Type': 'multipart/form-data' } } 
+      : undefined;
+    return api.put(`/blogs/${id}`, data, config);
+  },
+  delete: (id: string) => api.delete(`/blogs/${id}`),
+};
+
+export const eventService = {
+  getAll: (params?: object) => api.get('/events', { params }),
+  getPublicAll: (params?: object) => api.get('/events/public/all', { params }),
+  getPublicById: (id: string) => api.get(`/events/public/${id}`),
+  registerForEvent: (id: string) => api.post(`/events/public/${id}/register`),
+  getById: (id: string) => api.get(`/events/${id}`),
+  create: (data: FormData | object) => {
+    const config = data instanceof FormData 
+      ? { headers: { 'Content-Type': 'multipart/form-data' } } 
+      : undefined;
+    return api.post('/events', data, config);
+  },
+  update: (id: string, data: FormData | object) => {
+    const config = data instanceof FormData 
+      ? { headers: { 'Content-Type': 'multipart/form-data' } } 
+      : undefined;
+    return api.put(`/events/${id}`, data, config);
+  },
+  delete: (id: string) => api.delete(`/events/${id}`),
+};
+
+export const projectService = {
+  getAll: (params?: object) => api.get('/projects', { params }),
+  getPublicAll: (params?: object) => api.get('/projects/public/all', { params }),
+  getPublicById: (id: string) => api.get(`/projects/public/${id}`),
+  getById: (id: string) => api.get(`/projects/${id}`),
+  create: (data: FormData | object) => {
+    const config = data instanceof FormData 
+      ? { headers: { 'Content-Type': 'multipart/form-data' } } 
+      : undefined;
+    return api.post('/projects', data, config);
+  },
+  update: (id: string, data: FormData | object) => {
+    const config = data instanceof FormData 
+      ? { headers: { 'Content-Type': 'multipart/form-data' } } 
+      : undefined;
+    return api.put(`/projects/${id}`, data, config);
+  },
+  delete: (id: string) => api.delete(`/projects/${id}`),
+};
+
+export const contactService = {
+  submitMessage: (data: object) => api.post('/contact/public/message', data),
+  getAll: (params?: object) => api.get('/contact', { params }),
+  getById: (id: string) => api.get(`/contact/${id}`),
+  replyToMessage: (id: string, content: string) => api.post(`/contact/${id}/reply`, { content }),
+  updateStatus: (id: string, status: string) => api.put(`/contact/${id}/status`, { status }),
+  delete: (id: string) => api.delete(`/contact/${id}`),
+};
+
+export const systemInfoService = {
+  get: () => api.get('/system-info'),
+  update: (data: object) => api.put('/system-info', data),
+};
+
+export const documentAdminService = {
+  getAll: (params?: object) => api.get('/document-templates/admin/all', { params }),
+};
+
+export const templateConfigService = {
+  getAll: () => api.get('/template-config'),
+  update: (templateType: string, data: object) => api.put(`/template-config/${templateType}`, data),
+};
+
+export const documentApprovalService = {
+  getMyPending: (params?: object) => api.get('/document-approvals/my-pending', { params }),
+  getPendingCount: () => api.get('/document-approvals/pending-count'),
+  getForDocument: (id: string) => api.get(`/document-approvals/document/${id}`),
+  create: (data: object) => api.post('/document-approvals', data),
+  approve: (id: string, data?: object) => api.put(`/document-approvals/${id}/approve`, data || {}),
+  reject: (id: string, comment?: string) => api.put(`/document-approvals/${id}/reject`, { comment }),
+};
+
+export const teamService = {
+  getAll: (params?: object) => api.get('/team', { params }),
+  getPublicAll: (params?: object) => api.get('/team/public/all', { params }),
+  getById: (id: string) => api.get(`/team/${id}`),
+  create: (data: FormData | object) => {
+    const config = data instanceof FormData 
+      ? { headers: { 'Content-Type': 'multipart/form-data' } } 
+      : undefined;
+    return api.post('/team', data, config);
+  },
+  update: (id: string, data: FormData | object) => {
+    const config = data instanceof FormData 
+      ? { headers: { 'Content-Type': 'multipart/form-data' } } 
+      : undefined;
+    return api.put(`/team/${id}`, data, config);
+  },
+  delete: (id: string) => api.delete(`/team/${id}`),
 };
