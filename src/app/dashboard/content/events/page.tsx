@@ -48,7 +48,7 @@ export default function EventsPage() {
     }
   });
 
-  const canManage = ['chairman', 'pro', 'program_coordinator'].includes(me?.role || '');
+  const canManage = ['super_admin', 'chairman', 'pro', 'program_coordinator'].includes(me?.role || '');
 
   const load = useCallback(async () => {
     setLoading(true);

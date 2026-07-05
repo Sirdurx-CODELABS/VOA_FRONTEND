@@ -6,7 +6,7 @@ import { ActivityMedia, Activity } from '@/types';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { formatDate, cn } from '@/lib/utils';
-import { Upload, Download, Share2, X, Image as ImageIcon, Plus, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
+import { Upload, Download, Share2, X, Image as ImageIcon, Plus, ChevronLeft, ChevronRight, Trash2, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function GalleryPage() {
@@ -66,6 +66,14 @@ export default function GalleryPage() {
     } catch (e: unknown) {
       toast.error((e as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Upload failed');
     } finally { setUploading(false); }
+  };
+
+  const handleToggleVisibility = async (mediaId: string, current?: boolean) => {
+    try {
+      await activityService.toggleMediaVisibility(mediaId, !current);
+      setMedia(prev => prev.map(m => m._id === mediaId ? { ...m, showOnWebsite: !current } : m));
+      toast.success(current ? 'Hidden from website' : 'Visible on website');
+    } catch { toast.error('Failed to update visibility'); }
   };
 
   const handleDelete = async (mediaId: string) => {
@@ -145,12 +153,20 @@ export default function GalleryPage() {
                   <p className="text-white/70 text-[10px]">{(item.activityId as { title: string })?.title}</p>
                 </div>
               </div>
-              {/* Delete button for uploader */}
+              {/* Actions for uploader */}
               {(item.uploadedBy as { _id: string })?._id === me?._id && (
-                <button onClick={e => { e.stopPropagation(); handleDelete(item._id); }}
-                  className="absolute top-2 right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Trash2 className="w-3 h-3" />
-                </button>
+                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button onClick={e => { e.stopPropagation(); handleToggleVisibility(item._id, item.showOnWebsite); }}
+                    className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${
+                      item.showOnWebsite ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-500 hover:bg-gray-600'
+                    } text-white`} title={item.showOnWebsite ? 'Visible on website' : 'Hidden from website'}>
+                    {item.showOnWebsite ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                  </button>
+                  <button onClick={e => { e.stopPropagation(); handleDelete(item._id); }}
+                    className="w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
               )}
             </div>
           ))}

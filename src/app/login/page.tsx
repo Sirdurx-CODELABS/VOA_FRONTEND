@@ -31,9 +31,9 @@ export default function LoginPage() {
     try {
       setPendingAccount(false);
       const res = await authService.login(data);
-      const { token, user } = res.data.data;
-      setAuth(user, token);
-      toast.success(`Welcome back, ${user.fullName.split(' ')[0]}! 👋`);
+      const { token, user, organization } = res.data.data;
+      setAuth(user, token, organization);
+      toast.success(`Welcome back, ${user.fullName.split(' ')[0]}!`);
       router.push('/dashboard');
     } catch (err: unknown) {
       const msg: string = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Login failed';

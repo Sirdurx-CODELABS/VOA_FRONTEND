@@ -31,7 +31,7 @@ export default function ContactPage() {
 
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<ReplyFormData>();
 
-  const canManage = ['chairman', 'pro', 'secretary'].includes(me?.role || '');
+  const canManage = ['super_admin', 'chairman', 'pro', 'secretary'].includes(me?.role || '');
 
   const load = useCallback(async () => {
     setLoading(true);

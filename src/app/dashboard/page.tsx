@@ -241,7 +241,7 @@ function ContributionHistory({
 
 /* ── Main ───────────────────────────────────────────────────────────── */
 export default function DashboardPage() {
-  const { user } = useAuthStore();
+  const { user, organization } = useAuthStore();
   const [data, setData] = useState<DashData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -297,7 +297,7 @@ export default function DashboardPage() {
             <div>
               <div className="flex items-center gap-2 mb-0.5">
                 <Sparkles className="w-3.5 h-3.5 text-orange-300" />
-                <span className="text-orange-300 text-[11px] font-bold uppercase tracking-wider">Voice of Adolescents</span>
+                <span className="text-orange-300 text-[11px] font-bold uppercase tracking-wider">{organization?.organizationName || 'Voice of Adolescents'}</span>
               </div>
               <p className="text-white/60 text-sm">{greeting} 👋</p>
               <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight">{user.fullName.split(' ')[0]}</h1>
@@ -626,7 +626,7 @@ export default function DashboardPage() {
             <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-2xl shrink-0">🏅</div>
             <div>
               <p className="font-extrabold text-base">Founding Member #{user.foundingMemberRank}</p>
-              <p className="text-white/70 text-xs mt-0.5">You are one of the original members of VOA. Thank you for your dedication.</p>
+              <p className="text-white/70 text-xs mt-0.5">You are one of the original members of {organization?.organizationName || 'VOA'}. Thank you for your dedication.</p>
             </div>
           </div>
         </div>
@@ -637,7 +637,7 @@ export default function DashboardPage() {
         <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/5 rounded-full pointer-events-none" />
         <Heart className="w-4 h-4 text-orange-300 mx-auto mb-1.5" />
         <p className="font-extrabold text-sm">&ldquo;Empowering Voices. Building Futures.&rdquo;</p>
-        <p className="text-white/50 text-xs mt-1">Voice of Adolescents · Together we grow</p>
+        <p className="text-white/50 text-xs mt-1">{organization?.organizationName || 'Voice of Adolescents'} · Together we grow</p>
       </div>
 
     </div>

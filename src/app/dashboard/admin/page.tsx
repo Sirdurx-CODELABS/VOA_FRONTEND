@@ -7,13 +7,15 @@ import { User } from '@/types';
 import { UsersTab } from './_users';
 import { AuditTab } from './_audit';
 import { SystemInfoTab } from './_systemInfo';
+import { SocialChannelsTab } from './_socialChannels';
+import { OrganizationsTab } from './_organizations';
 import { cn } from '@/lib/utils';
 import {
   ShieldCheck, Users, Calendar, DollarSign, Heart,
-  AlertTriangle, ClipboardList, TrendingUp, Activity, Info,
+  AlertTriangle, ClipboardList, TrendingUp, Activity, Info, Share2, Building2,
 } from 'lucide-react';
 
-type TabId = 'overview' | 'users' | 'programs' | 'transactions' | 'welfare' | 'audit' | 'systemInfo';
+type TabId = 'overview' | 'users' | 'organizations' | 'programs' | 'transactions' | 'welfare' | 'audit' | 'systemInfo' | 'socialChannels';
 
 function Tab({ label, icon: Icon, active, badge, onClick }: {
   label: string; icon: React.ElementType; active: boolean; badge?: number; onClick: () => void;
@@ -120,8 +122,10 @@ export default function SuperAdminPage() {
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
         <Tab label="Overview" icon={ShieldCheck} active={tab === 'overview'} onClick={() => setTab('overview')} />
         <Tab label="Users" icon={Users} active={tab === 'users'} onClick={() => setTab('users')} />
+        <Tab label="Organizations" icon={Building2} active={tab === 'organizations'} onClick={() => setTab('organizations')} />
         <Tab label="Audit Log" icon={ClipboardList} active={tab === 'audit'} badge={stats?.totalAuditLogs} onClick={() => setTab('audit')} />
         <Tab label="System Info" icon={Info} active={tab === 'systemInfo'} onClick={() => setTab('systemInfo')} />
+        <Tab label="Social Channels" icon={Share2} active={tab === 'socialChannels'} onClick={() => setTab('socialChannels')} />
       </div>
 
       {/* Tab content */}
@@ -156,9 +160,11 @@ export default function SuperAdminPage() {
         />
       )}
 
+      {tab === 'organizations' && <OrganizationsTab />}
       {tab === 'audit' && <AuditTab />}
 
       {tab === 'systemInfo' && <SystemInfoTab />}
+      {tab === 'socialChannels' && <SocialChannelsTab />}
     </div>
   );
 }

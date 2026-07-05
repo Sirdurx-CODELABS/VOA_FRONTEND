@@ -23,7 +23,7 @@ const notifMeta = (type: string) => {
 
 export function Navbar() {
   const router = useRouter();
-  const { user, logout } = useAuthStore();
+  const { user, organization, logout } = useAuthStore();
   const { toggleSidebar, darkMode, toggleDarkMode } = useUIStore();
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -79,7 +79,7 @@ export function Navbar() {
 
       {/* Org name — hidden on very small screens */}
       <div className="hidden sm:flex items-center gap-2 flex-1 ml-1 min-w-0">
-        <span className="text-sm font-bold gradient-text truncate">Voice of Adolescents</span>
+        <span className="text-sm font-bold gradient-text truncate">{organization?.organizationName || 'Voice of Adolescents'}</span>
         <span className="text-slate-300 dark:text-slate-700 hidden md:block">·</span>
         <span className="text-xs text-slate-400 font-medium hidden md:block whitespace-nowrap">Management System</span>
       </div>

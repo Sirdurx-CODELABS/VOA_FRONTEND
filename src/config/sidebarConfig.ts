@@ -3,7 +3,7 @@ import {
   FileText, Megaphone, Heart, BarChart2, Bell, Settings,
   BookOpen, ShieldCheck, ClipboardList, GitBranch, Briefcase, Target,
   Activity, Image, PenTool, MapPin, FolderKanban, UsersRound, Mail, Printer,
-  CheckSquare,
+  CheckSquare, Share2, Building2,
 } from 'lucide-react';
 import { Permission, PERMISSIONS } from '@/lib/permissions';
 import { Role } from '@/types';
@@ -38,6 +38,14 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
     href: '/dashboard',
     icon: LayoutDashboard,
     alwaysShow: true,
+    section: 'Main',
+  },
+  {
+    id: 'organization',
+    label: 'Organization',
+    href: '/dashboard/organization',
+    icon: Building2,
+    permission: PERMISSIONS.MANAGE_ORGANIZATION,
     section: 'Main',
   },
 
@@ -80,6 +88,7 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
       { label: 'All Activities',   href: '/dashboard/activities',               alwaysShow: true },
       { label: 'My Invitations',   href: '/dashboard/activities?view=mine',     alwaysShow: true },
       { label: 'Create Activity',  href: '/dashboard/activities?action=create', roles: ['super_admin', 'chairman', 'vice_chairman', 'secretary', 'program_coordinator'] as Role[] },
+      { label: 'Activity Reports', href: '/dashboard/activities/reports',        alwaysShow: true },
     ],
   },
   {
@@ -139,18 +148,6 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
       { label: 'Gallery', href: '/dashboard/gallery', permission: PERMISSIONS.VIEW_GALLERY },
       { label: 'Team', href: '/dashboard/content/team', permission: PERMISSIONS.VIEW_TEAM },
       { label: 'Contact', href: '/dashboard/content/contact', permission: PERMISSIONS.VIEW_CONTACT },
-    ],
-  },
-  {
-    id: 'reports',
-    label: 'Reports',
-    icon: FileText,
-    permission: PERMISSIONS.VIEW_REPORTS,
-    section: 'Content',
-    children: [
-      { label: 'All Reports',     href: '/dashboard/reports',                      permission: PERMISSIONS.VIEW_REPORTS },
-      { label: 'Meeting Minutes', href: '/dashboard/reports?type=meeting_minutes', permission: PERMISSIONS.VIEW_REPORTS },
-      { label: 'Upload Report',   href: '/dashboard/reports?action=create',        permission: PERMISSIONS.CREATE_REPORTS },
     ],
   },
   {
@@ -245,6 +242,8 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
       { label: 'System Control', href: '/dashboard/admin', roles: ['super_admin'] },
       { label: 'System Logs', href: '/dashboard/admin?tab=logs', roles: ['super_admin'] },
       { label: 'Document Templates', href: '/dashboard/document-templates', roles: ['super_admin', 'chairman'] },
+      { label: 'Social Channels', href: '/dashboard/admin?tab=socialChannels', roles: ['super_admin'] },
+      { label: 'Organizations', href: '/dashboard/admin/organizations', roles: ['super_admin'] },
     ],
   },
 ];

@@ -190,7 +190,7 @@ function NavGroup({
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, logout } = useAuthStore();
+  const { user, organization, logout } = useAuthStore();
   const { sidebarOpen, toggleSidebar, setSidebar, badgeCounts, setBadgeCounts } = useUIStore();
 
   // Fetch badge counts periodically

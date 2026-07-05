@@ -3,15 +3,59 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { activityService, userService } from '@/services/api.service';
-import { Activity, ActivityParticipant, User } from '@/types';
+import { Activity, ActivityParticipant, ActivityReport, ActivityMedia, User } from '@/types';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { formatDate, calcAge, membershipTypeLabel, cn } from '@/lib/utils';
 import {
   Plus, Calendar, MapPin, Users, Clock, CheckCircle, XCircle,
-  AlertCircle, Filter, ChevronDown, ChevronUp, Upload, Eye,
+  AlertCircle, Filter, ChevronDown, ChevronUp, Upload, Eye, FileText, Paperclip,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+
+const REPORT_TYPES_BY_ACTIVITY: Record<string, { value: string; label: string }[]> = {
+  meeting: [
+    { value: 'meeting_minutes', label: 'Meeting Minutes' },
+    { value: 'attendance_summary', label: 'Attendance Summary' },
+    { value: 'executive_summary', label: 'Executive Summary' },
+  ],
+  event: [
+    { value: 'event_report', label: 'Event Report' },
+    { value: 'feedback_report', label: 'Feedback Report' },
+    { value: 'summary', label: 'Summary' },
+  ],
+  community_outreach: [
+    { value: 'outreach_report', label: 'Outreach Report' },
+    { value: 'impact_report', label: 'Impact Report' },
+  ],
+  community_visit: [
+    { value: 'visit_report', label: 'Visit Report' },
+  ],
+  welfare_visit: [
+    { value: 'welfare_report', label: 'Welfare Report' },
+    { value: 'assessment_report', label: 'Assessment Report' },
+  ],
+  health_awareness: [
+    { value: 'health_report', label: 'Health Report' },
+    { value: 'awareness_report', label: 'Awareness Report' },
+  ],
+  training: [
+    { value: 'training_report', label: 'Training Report' },
+    { value: 'assessment_report', label: 'Assessment Report' },
+  ],
+  workshop: [
+    { value: 'workshop_report', label: 'Workshop Report' },
+    { value: 'feedback_report', label: 'Feedback Report' },
+  ],
+  field_activity: [
+    { value: 'field_report', label: 'Field Report' },
+    { value: 'activity_report', label: 'Activity Report' },
+  ],
+  other: [
+    { value: 'general_report', label: 'General Report' },
+    { value: 'custom_report', label: 'Custom Report' },
+  ],
+};
 
 const ACTIVITY_TYPES = [
   { value: 'meeting', label: 'Meeting' },
@@ -53,7 +97,7 @@ export default function ActivitiesPage() {
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'all' | 'mine'>(viewMine ? 'mine' : 'all');
   const [detailModal, setDetailModal] = useState<string | null>(null);
-  const [detailData, setDetailData] = useState<{ activity: Activity; participants: ActivityParticipant[] } | null>(null);
+  const [detailData, setDetailData] = useState<{ activity: Activity; participants: ActivityParticipant[]; media: ActivityMedia[]; reports: ActivityReport[] } | null>(null);
   const [createModal, setCreateModal] = useState(openCreate);
   const [respondModal, setRespondModal] = useState<ActivityParticipant | null>(null);
   const [attendModal, setAttendModal] = useState<ActivityParticipant | null>(null);
@@ -63,12 +107,18 @@ export default function ActivitiesPage() {
   const [form, setForm] = useState({
     title: '', type: 'meeting', description: '', date: '', startTime: '', endTime: '',
     venue: '', peopleNeeded: '', targetMembershipType: 'all', targetGender: 'all',
-    targetAgeMin: '', targetAgeMax: '', customConditions: '', status: 'published',
+    targetAgeMin: '', targetAgeMax: '', customConditions: '', notes: '', status: 'published',
   });
   const [respondForm, setRespondForm] = useState({ responseStatus: 'accepted', responseReason: '' });
   const [attendForm, setAttendForm] = useState({ attendanceStatus: 'present', attendanceReason: '' });
   const [submitting, setSubmitting] = useState(false);
   const [showFilterPanel, setShowFilterPanel] = useState(false);
+  // Report state
+  const [reportModal, setReportModal] = useState(false);
+  const [reportActivityId, setReportActivityId] = useState<string | null>(null);
+  const [reportForm, setReportForm] = useState({ title: '', content: '', reportType: '' });
+  const [reportFiles, setReportFiles] = useState<FileList | null>(null);
+  const [reportSubmitting, setReportSubmitting] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -116,7 +166,7 @@ export default function ActivitiesPage() {
       setCreateModal(false);
       setSelectedInvitees([]);
       setFilterPreview([]);
-      setForm({ title: '', type: 'meeting', description: '', date: '', startTime: '', endTime: '', venue: '', peopleNeeded: '', targetMembershipType: 'all', targetGender: 'all', targetAgeMin: '', targetAgeMax: '', customConditions: '', status: 'published' });
+      setForm({ title: '', type: 'meeting', description: '', date: '', startTime: '', endTime: '', venue: '', peopleNeeded: '', targetMembershipType: 'all', targetGender: 'all', targetAgeMin: '', targetAgeMax: '', customConditions: '', notes: '', status: 'published' });
       load();
     } catch (e: unknown) {
       toast.error((e as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed');
@@ -153,6 +203,33 @@ export default function ActivitiesPage() {
     } catch (e: unknown) {
       toast.error((e as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed');
     } finally { setSubmitting(false); }
+  };
+
+  const handleCreateReport = async () => {
+    if (!reportForm.title || !reportForm.reportType) return toast.error('Title and report type are required');
+    if (!reportActivityId) return toast.error('No activity selected');
+    setReportSubmitting(true);
+    try {
+      const fd = new FormData();
+      fd.append('title', reportForm.title);
+      fd.append('content', reportForm.content);
+      fd.append('reportType', reportForm.reportType);
+      if (reportFiles) Array.from(reportFiles).forEach(f => fd.append('attachments', f));
+      await activityService.createReport(reportActivityId, fd);
+      toast.success('Report created');
+      setReportModal(false);
+      setReportActivityId(null);
+      setReportForm({ title: '', content: '', reportType: '' });
+      setReportFiles(null);
+      // Refresh detail if the detail modal is still open for this activity
+      if (detailModal === reportActivityId) {
+        const r = await activityService.getById(detailModal);
+        setDetailData(r.data.data);
+      }
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      toast.error(msg || 'Failed to create report');
+    } finally { setReportSubmitting(false); }
   };
 
   const inputCls = 'w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-sm px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/30 focus:border-[#1E3A8A]';
@@ -302,6 +379,13 @@ export default function ActivitiesPage() {
             {detailData.activity.description && (
               <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{detailData.activity.description}</p>
             )}
+            {/* Notes */}
+            {detailData.activity.notes && (
+              <div>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Notes</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400 whitespace-pre-wrap bg-slate-50 dark:bg-slate-800 rounded-xl p-3">{detailData.activity.notes}</p>
+              </div>
+            )}
             {/* Participants */}
             <div>
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
@@ -323,6 +407,47 @@ export default function ActivitiesPage() {
                   </div>
                 ))}
                 {detailData.participants.length === 0 && <p className="text-sm text-slate-400 text-center py-4">No participants yet</p>}
+              </div>
+            </div>
+            {/* Reports */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Reports ({detailData.reports?.length || 0})</p>
+                <button onClick={() => {
+                  setReportActivityId(detailModal);
+                  setReportModal(true);
+                  const types = REPORT_TYPES_BY_ACTIVITY[detailData.activity.type] || REPORT_TYPES_BY_ACTIVITY.other;
+                  setReportForm({ title: '', content: '', reportType: types[0]?.value || 'general_report' });
+                }}
+                  className="flex items-center gap-1 text-xs font-bold text-[#1E3A8A] dark:text-blue-400 hover:underline">
+                  <Plus className="w-3 h-3" /> Add Report
+                </button>
+              </div>
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {detailData.reports?.length > 0 ? detailData.reports.map(r => (
+                  <div key={r._id} className="flex items-start justify-between bg-slate-50 dark:bg-slate-800 rounded-xl px-4 py-2.5">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <FileText className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                        <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 truncate">{r.title}</p>
+                      </div>
+                      <p className="text-xs text-slate-400 mt-0.5 capitalize">{r.reportType?.replace(/_/g, ' ')}</p>
+                      {r.content && <p className="text-xs text-slate-500 mt-1 line-clamp-2">{r.content}</p>}
+                      {r.attachments?.length > 0 && (
+                        <div className="flex items-center gap-1 mt-1">
+                          <Paperclip className="w-3 h-3 text-slate-400" />
+                          <span className="text-xs text-slate-400">{r.attachments.length} file(s)</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-right shrink-0 ml-3">
+                      <p className="text-[10px] text-slate-400">{r.createdBy?.fullName}</p>
+                      <p className="text-[10px] text-slate-400">{formatDate(r.createdAt)}</p>
+                    </div>
+                  </div>
+                )) : (
+                  <p className="text-sm text-slate-400 text-center py-4">No reports yet</p>
+                )}
               </div>
             </div>
           </div>
@@ -387,6 +512,37 @@ export default function ActivitiesPage() {
         </div>
       </Modal>
 
+      {/* Create Report Modal */}
+      <Modal open={reportModal} onClose={() => { setReportModal(false); setReportActivityId(null); setReportForm({ title: '', content: '', reportType: '' }); setReportFiles(null); }} title="Add Report" size="lg">
+        <div className="space-y-4">
+          <div>
+            <label className={labelCls}>Report Title *</label>
+            <input value={reportForm.title} onChange={e => setReportForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. Meeting Minutes" className={inputCls} />
+          </div>
+          <div>
+            <label className={labelCls}>Report Type *</label>
+            <select value={reportForm.reportType} onChange={e => setReportForm(f => ({ ...f, reportType: e.target.value }))} className={inputCls}>
+              {detailData && (REPORT_TYPES_BY_ACTIVITY[detailData.activity.type] || REPORT_TYPES_BY_ACTIVITY.other).map(t => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className={labelCls}>Content</label>
+            <textarea value={reportForm.content} onChange={e => setReportForm(f => ({ ...f, content: e.target.value }))} rows={5} placeholder="Report details..." className={cn(inputCls, 'resize-none')} />
+          </div>
+          <div>
+            <label className={labelCls}>Attachments (images, PDF, DOC, XLSX)</label>
+            <input type="file" multiple accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.xls,.xlsx" onChange={e => setReportFiles(e.target.files)}
+              className="w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-[#1E3A8A]/10 file:text-[#1E3A8A] hover:file:bg-[#1E3A8A]/20" />
+          </div>
+          <div className="flex gap-3 justify-end">
+            <Button variant="outline" onClick={() => { setReportModal(false); setReportActivityId(null); setReportForm({ title: '', content: '', reportType: '' }); setReportFiles(null); }}>Cancel</Button>
+            <Button onClick={handleCreateReport} loading={reportSubmitting}>Create Report</Button>
+          </div>
+        </div>
+      </Modal>
+
       {/* Create Activity Modal */}
       <Modal open={createModal} onClose={() => setCreateModal(false)} title="Create Activity" size="xl">
         <div className="space-y-5">
@@ -428,6 +584,10 @@ export default function ActivitiesPage() {
             <div className="sm:col-span-2">
               <label className={labelCls}>Description</label>
               <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} placeholder="Activity description..." className={cn(inputCls, 'resize-none')} />
+            </div>
+            <div className="sm:col-span-2">
+              <label className={labelCls}>Notes <span className="text-slate-400 font-normal normal-case">(optional)</span></label>
+              <textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={2} placeholder="Internal notes about this activity..." className={cn(inputCls, 'resize-none')} />
             </div>
           </div>
 

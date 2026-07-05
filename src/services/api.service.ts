@@ -223,8 +223,15 @@ export const activityService = {
   markAttendance: (id: string, data: { attendanceStatus: string; attendanceReason?: string }) => api.patch(`/activities/${id}/attendance`, data),
   getGallery: (params?: object) => api.get('/activities/gallery', { params }),
   uploadMedia: (id: string, data: FormData) => api.post(`/activities/${id}/media`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  toggleMediaVisibility: (mediaId: string, showOnWebsite: boolean) => api.patch(`/activities/media/${mediaId}/visibility`, { showOnWebsite }),
   deleteMedia: (mediaId: string) => api.delete(`/activities/media/${mediaId}`),
   getPublicMedia: (token: string) => api.get(`/activities/gallery/public/${token}`),
+  getPublicGallery: (params?: object) => api.get('/activities/gallery/public', { params }),
+  // Reports
+  getReports: (id: string, params?: object) => api.get(`/activities/${id}/reports`, { params }),
+  createReport: (id: string, data: FormData) => api.post(`/activities/${id}/reports`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  updateReport: (id: string, reportId: string, data: object) => api.put(`/activities/${id}/reports/${reportId}`, data),
+  deleteReport: (id: string, reportId: string) => api.delete(`/activities/${id}/reports/${reportId}`),
 };
 
 export const blogService = {
@@ -318,6 +325,26 @@ export const documentApprovalService = {
   create: (data: object) => api.post('/document-approvals', data),
   approve: (id: string, data?: object) => api.put(`/document-approvals/${id}/approve`, data || {}),
   reject: (id: string, comment?: string) => api.put(`/document-approvals/${id}/reject`, { comment }),
+};
+
+export const organizationService = {
+  getMyOrganization: () => api.get('/organizations/me'),
+  updateMyOrganization: (data: object) => api.put('/organizations/me', data),
+  getAll: (params?: object) => api.get('/organizations', { params }),
+  getById: (id: string) => api.get(`/organizations/${id}`),
+  create: (data: object) => api.post('/organizations', data),
+  update: (id: string, data: object) => api.put(`/organizations/${id}`, data),
+  updateStatus: (id: string, status: string) => api.patch(`/organizations/${id}/status`, { status }),
+  delete: (id: string) => api.delete(`/organizations/${id}`),
+};
+
+export const socialChannelService = {
+  getAll: (params?: object) => api.get('/social-channels', { params }),
+  getById: (id: string) => api.get(`/social-channels/${id}`),
+  create: (data: object) => api.post('/social-channels', data),
+  update: (id: string, data: object) => api.put(`/social-channels/${id}`, data),
+  delete: (id: string) => api.delete(`/social-channels/${id}`),
+  getActive: () => api.get('/social-channels/active'),
 };
 
 export const teamService = {

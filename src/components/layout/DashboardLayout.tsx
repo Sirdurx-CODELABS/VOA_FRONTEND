@@ -11,7 +11,7 @@ const LOGO_URL = 'https://res.cloudinary.com/dvqfrm6rc/image/upload/v1775567811/
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { isAuthenticated, _hydrated } = useAuthStore();
+  const { isAuthenticated, _hydrated, organization } = useAuthStore();
   const { sidebarOpen, darkMode } = useUIStore();
 
   useEffect(() => {
@@ -27,14 +27,14 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen bg-slate-50 dark:bg-[#0F172A] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={LOGO_URL} alt="VOA Logo" width={80} height={80}
+          <img src={LOGO_URL} alt={`${organization?.organizationName || 'VOA'} Logo`} width={80} height={80}
             style={{ width: 80, height: 80, objectFit: 'contain', animation: 'pulse 2s cubic-bezier(0.4,0,0.6,1) infinite' }} />
           <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full bg-[#1E3A8A] animate-bounce" style={{ animationDelay: '0ms' }} />
             <div className="w-1.5 h-1.5 rounded-full bg-[#F97316] animate-bounce" style={{ animationDelay: '150ms' }} />
             <div className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-bounce" style={{ animationDelay: '300ms' }} />
           </div>
-          <p className="text-xs text-slate-400 font-medium tracking-wide">Loading VOA System...</p>
+          <p className="text-xs text-slate-400 font-medium tracking-wide">Loading {organization?.organizationName || 'VOA'} System...</p>
         </div>
       </div>
     );

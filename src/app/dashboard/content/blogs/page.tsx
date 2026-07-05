@@ -45,7 +45,7 @@ export default function BlogsPage() {
     }
   });
 
-  const canManage = ['chairman', 'pro'].includes(me?.role || '');
+  const canManage = ['super_admin', 'chairman', 'pro'].includes(me?.role || '');
 
   const load = useCallback(async () => {
     setLoading(true);

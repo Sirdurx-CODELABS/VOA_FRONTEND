@@ -49,7 +49,7 @@ export default function ProjectsPage() {
     }
   });
 
-  const canManage = ['chairman', 'pro'].includes(me?.role || '');
+  const canManage = ['super_admin', 'chairman', 'pro'].includes(me?.role || '');
 
   const load = useCallback(async () => {
     setLoading(true);

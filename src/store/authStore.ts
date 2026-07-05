@@ -1,13 +1,14 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { User } from '@/types';
+import { User, Organization } from '@/types';
 
 interface AuthState {
   user: User | null;
   token: string | null;
+  organization: Organization | null;
   isAuthenticated: boolean;
-  _hydrated: boolean;           // ← tracks when persist has finished loading
-  setAuth: (user: User, token: string) => void;
+  _hydrated: boolean;
+  setAuth: (user: User, token: string, organization?: Organization | null) => void;
   logout: () => void;
   updateUser: (user: Partial<User>) => void;
   setHydrated: () => void;
@@ -18,18 +19,19 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       token: null,
+      organization: null,
       isAuthenticated: false,
       _hydrated: false,
-      setAuth: (user, token) => {
+      setAuth: (user, token, organization = null) => {
         if (typeof window !== 'undefined') localStorage.setItem('voa_token', token);
-        set({ user, token, isAuthenticated: true });
+        set({ user, token, organization, isAuthenticated: true });
       },
       logout: () => {
         if (typeof window !== 'undefined') {
           localStorage.removeItem('voa_token');
           localStorage.removeItem('voa_user');
         }
-        set({ user: null, token: null, isAuthenticated: false });
+        set({ user: null, token: null, organization: null, isAuthenticated: false });
       },
       updateUser: (updates) =>
         set((state) => ({ user: state.user ? { ...state.user, ...updates } : null })),
@@ -38,7 +40,6 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'voa_auth',
       storage: createJSONStorage(() => localStorage),
-      // Called once rehydration from localStorage is complete
       onRehydrateStorage: () => (state) => {
         state?.setHydrated();
       },

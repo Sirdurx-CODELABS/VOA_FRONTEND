@@ -58,6 +58,7 @@ export const PERMISSIONS = {
   VIEW_TEAM:                    'view_team',
   MANAGE_CONTACT:               'manage_contact',
   VIEW_CONTACT:                 'view_contact',
+  MANAGE_ORGANIZATION:          'manage_organization',
 } as const;
 
 export type Permission = typeof PERMISSIONS[keyof typeof PERMISSIONS];
@@ -80,6 +81,7 @@ const ROLE_PERMISSIONS: Record<Role, string[]> = {
     'view_gallery', 'manage_gallery',
     'view_team', 'manage_team',
     'view_contact', 'manage_contact',
+    'manage_organization',
   ],
 
   vice_chairman: [
@@ -90,6 +92,7 @@ const ROLE_PERMISSIONS: Record<Role, string[]> = {
     'manage_announcements', 'post_executive_announcement', 'post_meeting_announcement',
     // Content permissions
     'view_blogs', 'view_events', 'view_projects', 'view_gallery', 'view_team', 'view_contact',
+    'manage_organization',
   ],
 
   secretary: [

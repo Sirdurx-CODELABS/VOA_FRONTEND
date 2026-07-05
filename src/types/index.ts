@@ -1,3 +1,42 @@
+export interface Organization {
+  _id: string;
+  organizationName: string;
+  shortName: string;
+  logo: string;
+  logoUrl: string;
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor: string;
+  district: string;
+  state: string;
+  country: string;
+  facilityType: string;
+  organizationType: string;
+  address: string;
+  contactEmail: string;
+  contactPhone: string;
+  website: string;
+  description: string;
+  status: string;
+  systemInfo?: {
+    email?: string;
+    phone?: string;
+    address?: string;
+    website?: string;
+    socialMedia?: {
+      facebook?: string;
+      instagram?: string;
+      youtube?: string;
+      twitter?: string;
+      linkedin?: string;
+      tiktok?: string;
+    };
+  };
+  memberCount?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type Role =
   | 'super_admin' | 'chairman' | 'vice_chairman'
   | 'secretary' | 'treasurer' | 'pro'
@@ -30,6 +69,8 @@ export interface User {
   earlyContributorBonusAwarded?: boolean;
   permissions?: string[];
   reportsTo?: User | string;
+  allianceOrganizationId?: string;
+  organization?: Organization;
   createdAt: string;
   updatedAt: string;
 }
@@ -129,7 +170,12 @@ export interface Notification {
   message: string;
   type: string;
   isRead: boolean;
+  link?: string;
+  relatedId?: string;
+  relatedModel?: string;
+  allianceOrganizationId?: string;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface PaginatedResponse<T> {
@@ -365,6 +411,7 @@ export interface Activity {
   targetAgeMin?: number | null;
   targetAgeMax?: number | null;
   customConditions?: string;
+  notes?: string;
   createdBy: User;
   status: 'draft' | 'published' | 'ongoing' | 'completed' | 'cancelled';
   createdAt: string;
@@ -390,6 +437,18 @@ export interface ActivityMedia {
   imageUrl: string;
   caption?: string;
   shareToken: string;
+  showOnWebsite?: boolean;
+  createdAt: string;
+}
+
+export interface ActivityReport {
+  _id: string;
+  activityId: string;
+  title: string;
+  content: string;
+  reportType: string;
+  createdBy: { _id: string; fullName: string };
+  attachments: string[];
   createdAt: string;
 }
 

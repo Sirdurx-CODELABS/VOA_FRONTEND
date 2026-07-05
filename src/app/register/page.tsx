@@ -1,10 +1,11 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { authService } from '@/services/auth.service';
+import api from '@/lib/axios';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { VOALogo } from '@/components/ui/VOALogo';
@@ -54,17 +55,17 @@ function deriveMembership(dob: string, isParent: boolean): { type: string; label
 
 /* ── Step indicator ──────────────────────────────────────────────────────── */
 function StepIndicator({ current }: { current: number }) {
-  const steps = ['Basic Info', 'Membership', 'Interests', 'Review'];
+  const steps = ['Organization', 'Basic Info', 'Membership', 'Interests', 'Review'];
   return (
     <div className="flex items-center justify-center gap-0 mb-6">
       {steps.map((label, i) => {
-        const idx = i + 1; const done = idx < current; const active = idx === current;
+        const done = i < current; const active = i === current;
         return (
           <div key={label} className="flex items-center">
             <div className="flex flex-col items-center">
               <div className={cn('w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all',
                 done ? 'bg-[#22C55E] text-white' : active ? 'bg-[#1E3A8A] text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-400')}>
-                {done ? <Check className="w-3.5 h-3.5" /> : idx}
+                {done ? <Check className="w-3.5 h-3.5" /> : i + 1}
               </div>
               <span className={cn('text-[9px] mt-1 font-semibold whitespace-nowrap hidden sm:block',
                 active ? 'text-[#1E3A8A] dark:text-blue-400' : 'text-slate-400')}>{label}</span>
@@ -105,7 +106,7 @@ function ConstitutionModal({ onClose }: { onClose: () => void }) {
 }
 
 export default function RegisterPage() {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
   const [step1Data, setStep1Data] = useState<Step1Data | null>(null);
   const [step2Data, setStep2Data] = useState<Step2Data | null>(null);
   const [isParentToggle, setIsParentToggle] = useState(false);
@@ -117,6 +118,17 @@ export default function RegisterPage() {
   const [showCelebration, setShowCelebration] = useState(false);
   const [registeredName, setRegisteredName] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [organizations, setOrganizations] = useState<{ _id: string; name: string; description?: string }[]>([]);
+  const [loadingOrgs, setLoadingOrgs] = useState(true);
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
+  const [otherOrgName, setOtherOrgName] = useState('');
+
+  useEffect(() => {
+    api.get('/organizations/public')
+      .then(res => setOrganizations(res.data || []))
+      .catch(() => toast.error('Failed to load organizations'))
+      .finally(() => setLoadingOrgs(false));
+  }, []);
 
   const s1 = useForm<Step1Data>({ resolver: zodResolver(step1Schema), defaultValues: { gender: 'other' } });
   const s2 = useForm<Step2Data>({ resolver: zodResolver(step2Schema) });
@@ -145,6 +157,12 @@ export default function RegisterPage() {
     if (!step1Data || !step2Data) return;
     setSubmitting(true);
     try {
+      const orgPayload: { allianceOrganizationId?: string; requestNewOrganization?: string } = {};
+      if (selectedOrgId && selectedOrgId !== '__other__') {
+        orgPayload.allianceOrganizationId = selectedOrgId;
+      } else if (selectedOrgId === '__other__' && otherOrgName.trim()) {
+        orgPayload.requestNewOrganization = otherOrgName.trim();
+      }
       await authService.register({
         fullName: step1Data.fullName,
         email: step1Data.email,
@@ -154,6 +172,7 @@ export default function RegisterPage() {
         dob: step2Data.dob,
         interests: selectedInterests,
         children: showChildrenSection ? children.filter(c => c.childName && c.childDob) : [],
+        ...orgPayload,
       });
       setRegisteredName(step1Data.fullName.split(' ')[0]);
       setShowCelebration(true);
@@ -197,6 +216,56 @@ export default function RegisterPage() {
 
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-6">
 
+            {/* ── STEP 0: Organization Selection ──────────────────── */}
+            {step === 0 && (
+              <>
+                <div className="mb-5">
+                  <h1 className="text-xl font-extrabold text-slate-800 dark:text-white">Select Your Organization</h1>
+                  <p className="text-slate-500 text-sm mt-1">Choose your affiliated organization or request a new one</p>
+                </div>
+                {loadingOrgs ? (
+                  <div className="flex justify-center py-12">
+                    <div className="w-8 h-8 border-4 border-[#1E3A8A]/30 border-t-[#1E3A8A] rounded-full animate-spin" />
+                  </div>
+                ) : (
+                  <div className="space-y-2 mb-5">
+                    {organizations.map(org => (
+                      <button key={org._id} type="button" onClick={() => { setSelectedOrgId(org._id); setOtherOrgName(''); }}
+                        className={cn('w-full text-left p-4 rounded-xl border-2 transition-all',
+                          selectedOrgId === org._id
+                            ? 'border-[#1E3A8A] bg-[#1E3A8A]/5 dark:bg-[#1E3A8A]/20'
+                            : 'border-slate-200 dark:border-slate-700 hover:border-slate-300')}>
+                        <p className="font-bold text-slate-800 dark:text-white">{org.name}</p>
+                        {org.description && <p className="text-xs text-slate-500 mt-0.5">{org.description}</p>}
+                      </button>
+                    ))}
+                    <button type="button" onClick={() => setSelectedOrgId('__other__')}
+                      className={cn('w-full text-left p-4 rounded-xl border-2 transition-all',
+                        selectedOrgId === '__other__'
+                          ? 'border-[#1E3A8A] bg-[#1E3A8A]/5 dark:bg-[#1E3A8A]/20'
+                          : 'border-slate-200 dark:border-slate-700 hover:border-slate-300')}>
+                      <p className="font-bold text-slate-800 dark:text-white">Other</p>
+                      <p className="text-xs text-slate-500 mt-0.5">My organization is not listed</p>
+                    </button>
+                    {selectedOrgId === '__other__' && (
+                      <input type="text" value={otherOrgName} onChange={e => setOtherOrgName(e.target.value)}
+                        placeholder="Enter your organization name"
+                        className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white text-sm px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/30 focus:border-[#1E3A8A]" />
+                    )}
+                    <button type="button" onClick={() => { setSelectedOrgId(null); setOtherOrgName(''); }}
+                      className={cn('w-full text-left p-4 rounded-xl border-2 transition-all',
+                        selectedOrgId === null
+                          ? 'border-[#1E3A8A] bg-[#1E3A8A]/5 dark:bg-[#1E3A8A]/20'
+                          : 'border-slate-200 dark:border-slate-700 hover:border-slate-300')}>
+                      <p className="font-bold text-slate-800 dark:text-white">None / Skip</p>
+                      <p className="text-xs text-slate-500 mt-0.5">Continue without an organization</p>
+                    </button>
+                  </div>
+                )}
+                <Button onClick={() => setStep(1)} className="w-full" size="lg">Continue <ChevronRight className="w-4 h-4" /></Button>
+              </>
+            )}
+
             {/* ── STEP 1: Basic Info ────────────────────────────────── */}
             {step === 1 && (
               <>
@@ -225,7 +294,10 @@ export default function RegisterPage() {
                     </button>
                   </div>
                   <Input label="Confirm Password" type="password" placeholder="Repeat password" icon={<Lock className="w-4 h-4" />} error={s1.formState.errors.confirmPassword?.message} {...s1.register('confirmPassword')} />
-                  <Button type="submit" className="w-full mt-2" size="lg">Continue <ChevronRight className="w-4 h-4" /></Button>
+                  <div className="flex gap-3 mt-2">
+                    <Button variant="outline" type="button" onClick={() => setStep(0)} className="flex-1"><ChevronLeft className="w-4 h-4" /> Back</Button>
+                    <Button type="submit" className="flex-1">Continue <ChevronRight className="w-4 h-4" /></Button>
+                  </div>
                 </form>
               </>
             )}
