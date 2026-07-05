@@ -13,7 +13,7 @@ import { notificationService, documentApprovalService } from '@/services/api.ser
 import { User } from '@/types';
 import toast from 'react-hot-toast';
 import {
-  ChevronLeft, ChevronRight, LogOut, Settings,
+  ChevronLeft, ChevronRight, LogOut, Settings, Building2,
 } from 'lucide-react';
 
 /* ── Badge pill ──────────────────────────────────────────────────────────── */
@@ -290,7 +290,18 @@ export function Sidebar() {
           'flex items-center h-16 lg:h-20 px-4 shrink-0 border-b border-white/10',
           sidebarOpen ? 'justify-between' : 'justify-center',
         )}>
-          {sidebarOpen && <VOALogo onDark size={44} />}
+          {sidebarOpen && (
+            organization?.logoUrl ? (
+              <div className="flex items-center gap-2.5 select-none">
+                <img src={organization.logoUrl} alt={organization.organizationName}
+                  className="w-[44px] h-[44px] object-contain rounded-xl" />
+                <div className="flex flex-col leading-none">
+                  <span className="text-white font-extrabold text-base tracking-tight">{organization.shortName || 'VOA'}</span>
+                  <span className="text-[#F97316] font-medium text-[10px] tracking-widest uppercase">Management</span>
+                </div>
+              </div>
+            ) : <VOALogo onDark size={44} />
+          )}
           <button
             onClick={toggleSidebar}
             className={cn(

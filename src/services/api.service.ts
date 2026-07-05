@@ -131,6 +131,9 @@ export const superAdminService = {
   updateWelfare: (id: string, data: object) => api.put(`/superadmin/welfare/${id}`, data),
   deleteWelfare: (id: string) => api.delete(`/superadmin/welfare/${id}`),
 
+  // Organization Stats
+  getOrganizationStats: (id: string) => api.get(`/superadmin/organizations/${id}/stats`),
+
   // Announcements / Reports
   deleteAnnouncement: (id: string) => api.delete(`/superadmin/announcements/${id}`),
   deleteReport: (id: string) => api.delete(`/superadmin/reports/${id}`),
@@ -336,6 +339,13 @@ export const organizationService = {
   update: (id: string, data: object) => api.put(`/organizations/${id}`, data),
   updateStatus: (id: string, status: string) => api.patch(`/organizations/${id}/status`, { status }),
   delete: (id: string) => api.delete(`/organizations/${id}`),
+  uploadLogo: (formData: FormData) => api.put('/organizations/me/logo', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    onUploadProgress: (e: ProgressEvent) => {
+      // progress tracking available if needed
+    },
+  }),
+  removeLogo: () => api.put('/organizations/me/logo/remove'),
 };
 
 export const socialChannelService = {

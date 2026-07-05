@@ -1,8 +1,8 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { organizationService } from '@/services/api.service';
-import { Building2, Save, Globe, Mail, Phone, MapPin, Palette, Link as LinkIcon } from 'lucide-react';
+import { Building2, Save, Globe, Mail, Phone, MapPin, Palette, Link as LinkIcon, Upload, X, Image as ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
@@ -235,6 +235,80 @@ export default function OrganizationPage() {
                   <input className={inputCls} value={(form.systemInfo.socialMedia as any)[sm.key]} onChange={e => setSocial(sm.key, e.target.value)} placeholder={sm.placeholder} />
                 </Field>
               ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* — Organization Logo — */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+          <ImageIcon className="w-4 h-4 text-[#F97316]" />
+          <h2 className="font-bold text-slate-800 dark:text-white">Organization Logo</h2>
+        </div>
+        <div className="p-6">
+          <div className="flex items-center gap-6">
+            <div className="w-24 h-24 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800 shrink-0">
+              {org?.logoUrl ? (
+                <img src={org.logoUrl} alt="Organization logo" className="w-full h-full object-contain" />
+              ) : (
+                <Building2 className="w-8 h-8 text-slate-400" />
+              )}
+            </div>
+            <div className="space-y-3">
+              <label className={cn(
+                'inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold cursor-pointer transition-all',
+                'bg-[#1E3A8A] hover:bg-[#1e3480] text-white shadow-sm'
+              )}>
+                <Upload className="w-4 h-4" />
+                {org?.logoUrl ? 'Change Logo' : 'Upload Logo'}
+                <input type="file" accept="image/jpeg,image/png,image/gif,image/webp" className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    if (file.size > 5 * 1024 * 1024) {
+                      toast.error('Image must be less than 5MB');
+                      return;
+                    }
+                    const fd = new FormData();
+                    fd.append('logo', file);
+                    try {
+                      const res = await organizationService.uploadLogo(fd);
+                      setOrg((prev: any) => ({ ...prev, logoUrl: res.data.data.logoUrl, logo: res.data.data.logo }));
+                      // Update auth store organization
+                      const { useAuthStore } = await import('@/store/authStore');
+                      useAuthStore.getState().setAuth(
+                        useAuthStore.getState().user!,
+                        useAuthStore.getState().token!,
+                        { ...useAuthStore.getState().organization!, logoUrl: res.data.data.logoUrl, logo: res.data.data.logo } as any
+                      );
+                      toast.success('Logo uploaded successfully!');
+                    } catch {
+                      toast.error('Failed to upload logo');
+                    }
+                  }} />
+              </label>
+              {org?.logoUrl && (
+                <button onClick={async () => {
+                  try {
+                    await organizationService.removeLogo();
+                    setOrg((prev: any) => ({ ...prev, logoUrl: '', logo: '' }));
+                    const { useAuthStore } = await import('@/store/authStore');
+                    useAuthStore.getState().setAuth(
+                      useAuthStore.getState().user!,
+                      useAuthStore.getState().token!,
+                      { ...useAuthStore.getState().organization!, logoUrl: '', logo: '' } as any
+                    );
+                    toast.success('Logo removed');
+                  } catch {
+                    toast.error('Failed to remove logo');
+                  }
+                }}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all">
+                  <X className="w-4 h-4" /> Remove Logo
+                </button>
+              )}
+              <p className="text-xs text-slate-400">Supported formats: JPEG, PNG, GIF, WebP. Max 5MB.</p>
             </div>
           </div>
         </div>

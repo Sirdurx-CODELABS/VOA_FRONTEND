@@ -88,7 +88,7 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
       { label: 'All Activities',   href: '/dashboard/activities',               alwaysShow: true },
       { label: 'My Invitations',   href: '/dashboard/activities?view=mine',     alwaysShow: true },
       { label: 'Create Activity',  href: '/dashboard/activities?action=create', roles: ['super_admin', 'chairman', 'vice_chairman', 'secretary', 'program_coordinator'] as Role[] },
-      { label: 'Activity Reports', href: '/dashboard/activities/reports',        alwaysShow: true },
+      { label: 'Activity Reports', href: '/dashboard/activities/reports',        permission: PERMISSIONS.VIEW_REPORTS },
     ],
   },
   {
@@ -134,20 +134,20 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
     permission: PERMISSIONS.VIEW_FINANCE,
   },
 
-  // ── CONTENT ───────────────────────────────────────────────────────────────
+  // ── CONTENT — Super Admin only ───────────────────────────────────────────
   {
     id: 'content',
     label: 'Content',
     icon: PenTool,
-    permission: PERMISSIONS.VIEW_BLOGS,
+    roles: ['super_admin'],
     section: 'Content',
     children: [
-      { label: 'Blog', href: '/dashboard/content/blogs', permission: PERMISSIONS.VIEW_BLOGS },
-      { label: 'Events', href: '/dashboard/content/events', permission: PERMISSIONS.VIEW_EVENTS },
-      { label: 'Projects', href: '/dashboard/content/projects', permission: PERMISSIONS.VIEW_PROJECTS },
-      { label: 'Gallery', href: '/dashboard/gallery', permission: PERMISSIONS.VIEW_GALLERY },
-      { label: 'Team', href: '/dashboard/content/team', permission: PERMISSIONS.VIEW_TEAM },
-      { label: 'Contact', href: '/dashboard/content/contact', permission: PERMISSIONS.VIEW_CONTACT },
+      { label: 'Blog', href: '/dashboard/content/blogs', roles: ['super_admin'] },
+      { label: 'Events', href: '/dashboard/content/events', roles: ['super_admin'] },
+      { label: 'Projects', href: '/dashboard/content/projects', roles: ['super_admin'] },
+      { label: 'Gallery', href: '/dashboard/gallery', alwaysShow: true },
+      { label: 'Team', href: '/dashboard/content/team', roles: ['super_admin'] },
+      { label: 'Contact', href: '/dashboard/content/contact', roles: ['super_admin'] },
     ],
   },
   {
