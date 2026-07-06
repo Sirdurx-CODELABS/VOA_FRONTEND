@@ -459,7 +459,7 @@ export default function ActivitiesPage() {
         <div className="space-y-4">
           <div>
             <label className={labelCls}>Your Response</label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {[{ v: 'accepted', label: '✅ Accept', color: 'border-[#22C55E] bg-green-50 dark:bg-green-900/20 text-[#22C55E]' },
                 { v: 'declined', label: '❌ Decline', color: 'border-red-400 bg-red-50 dark:bg-red-900/20 text-red-500' },
                 { v: 'absent', label: '⚠️ Absent', color: 'border-[#F97316] bg-orange-50 dark:bg-orange-900/20 text-[#F97316]' }].map(opt => (
@@ -488,7 +488,7 @@ export default function ActivitiesPage() {
       {/* Attendance Modal */}
       <Modal open={!!attendModal} onClose={() => setAttendModal(null)} title="Mark Attendance" size="sm">
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {[{ v: 'present', label: '✅ Present', color: 'border-[#22C55E] bg-green-50 dark:bg-green-900/20 text-[#22C55E]' },
               { v: 'absent', label: '⚠️ Absent', color: 'border-[#F97316] bg-orange-50 dark:bg-orange-900/20 text-[#F97316]' }].map(opt => (
               <button key={opt.v} type="button" onClick={() => setAttendForm(f => ({ ...f, attendanceStatus: opt.v }))}

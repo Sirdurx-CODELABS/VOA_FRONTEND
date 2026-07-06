@@ -10,7 +10,7 @@ const variants: Record<BadgeVariant, string> = {
   default: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700',
   purple:  'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border border-purple-200 dark:border-purple-800',
   orange:  'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border border-orange-200 dark:border-orange-800',
-  blue:    'bg-[#1E3A8A]/10 text-[#1E3A8A] dark:bg-blue-900/30 dark:text-blue-300 border border-[#1E3A8A]/20 dark:border-blue-800',
+  blue:    'bg-primary/10 text-primary border border-primary/20',
 };
 
 interface BadgeProps {

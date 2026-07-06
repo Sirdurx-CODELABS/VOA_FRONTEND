@@ -19,7 +19,7 @@ function Field({ label, error, children }: { label: string; error?: string; chil
 }
 
 export default function OrganizationPage() {
-  const { user, organization, updateUser } = useAuthStore();
+  const { user, organization, updateUser, updateOrganization } = useAuthStore();
   const [org, setOrg] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -78,6 +78,7 @@ export default function OrganizationPage() {
     try {
       const res = await organizationService.updateMyOrganization(form);
       setOrg(res.data.data);
+      updateOrganization(res.data.data);
       toast.success('Organization profile updated!');
     } catch (e: unknown) {
       toast.error((e as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to save');
@@ -103,7 +104,7 @@ export default function OrganizationPage() {
       <div className="max-w-4xl mx-auto space-y-6 animate-pulse">
         <div className="h-8 w-64 bg-slate-200 dark:bg-slate-700 rounded-xl" />
         <div className="h-40 bg-slate-200 dark:bg-slate-700 rounded-2xl" />
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {[...Array(4)].map((_, i) => <div key={i} className="h-20 bg-slate-200 dark:bg-slate-700 rounded-xl" />)}
         </div>
       </div>
@@ -276,7 +277,6 @@ export default function OrganizationPage() {
                       const res = await organizationService.uploadLogo(fd);
                       setOrg((prev: any) => ({ ...prev, logoUrl: res.data.data.logoUrl, logo: res.data.data.logo }));
                       // Update auth store organization
-                      const { useAuthStore } = await import('@/store/authStore');
                       useAuthStore.getState().setAuth(
                         useAuthStore.getState().user!,
                         useAuthStore.getState().token!,
@@ -293,7 +293,6 @@ export default function OrganizationPage() {
                   try {
                     await organizationService.removeLogo();
                     setOrg((prev: any) => ({ ...prev, logoUrl: '', logo: '' }));
-                    const { useAuthStore } = await import('@/store/authStore');
                     useAuthStore.getState().setAuth(
                       useAuthStore.getState().user!,
                       useAuthStore.getState().token!,

@@ -123,15 +123,15 @@ export function UsersTab({ users, loading, page, totalPages, search, onSearch, o
 
   const UserForm = () => (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Input label="Full Name" value={form.fullName} onChange={e => set('fullName', e.target.value)} placeholder="John Doe" />
         <Input label="Email" type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="john@example.com" />
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Input label="Phone" value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="08012345678" />
         <Input label="Password" type="password" value={form.password} onChange={e => set('password', e.target.value)} placeholder="Leave blank for default" />
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Select label="Role" value={form.role} onChange={e => set('role', e.target.value)} options={ROLES.map(r => ({ value: r, label: r.replace(/_/g, ' ') }))} />
         <Select label="Status" value={form.status} onChange={e => set('status', e.target.value)} options={[{ value: 'active', label: 'Active' }, { value: 'inactive', label: 'Inactive' }]} />
       </div>

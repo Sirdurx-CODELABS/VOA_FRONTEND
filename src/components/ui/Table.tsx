@@ -21,7 +21,7 @@ interface TableProps<T> {
 export function Table<T extends { _id?: string }>({ columns, data, loading, emptyMessage = 'No data found', emptyIcon, onRowClick }: TableProps<T>) {
   return (
     <div className="table-scroll">
-      <table className="w-full text-sm min-w-[500px]">
+      <table className="w-full text-sm min-w-[500px] responsive-table">
         <thead>
           <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40">
             {columns.map((col) => (
@@ -39,7 +39,7 @@ export function Table<T extends { _id?: string }>({ columns, data, loading, empt
             Array.from({ length: 5 }).map((_, i) => (
               <tr key={i}>
                 {columns.map((col) => (
-                  <td key={col.key} className="px-3 lg:px-5 py-3">
+                  <td key={col.key} data-label={col.header} className="px-3 lg:px-5 py-3">
                     <div className="skeleton h-4 w-full" />
                   </td>
                 ))}
@@ -63,7 +63,7 @@ export function Table<T extends { _id?: string }>({ columns, data, loading, empt
                 )}
               >
                 {columns.map((col) => (
-                  <td key={col.key} className={cn('px-3 lg:px-5 py-3 text-slate-700 dark:text-slate-300', col.className)}>
+                  <td key={col.key} data-label={col.header} className={cn('px-3 lg:px-5 py-3 text-slate-700 dark:text-slate-300', col.className)}>
                     {col.render ? col.render(row) : String((row as Record<string, unknown>)[col.key] ?? '')}
                   </td>
                 ))}
@@ -109,7 +109,7 @@ export function Pagination({ page, totalPages, total, limit, onPageChange }: Pag
               className={cn(
                 'w-8 h-8 rounded-lg text-xs font-semibold transition-colors',
                 p === page
-                  ? 'bg-[#1E3A8A] text-white'
+                  ? 'bg-primary text-white'
                   : 'border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
               )}>
               {p}

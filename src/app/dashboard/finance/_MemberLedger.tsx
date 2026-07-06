@@ -276,7 +276,7 @@ export function MemberLedger() {
       <Modal open={showDetailsModal} onClose={() => setShowDetailsModal(false)} title="Member Ledger Details" size="lg">
         {selectedLedgerDetails && (
           <div className="space-y-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4">
                 <div className="text-xs text-slate-500 uppercase">Total Paid</div>
                 <div className="text-xl font-bold text-slate-800 dark:text-white">{formatCurrency(selectedLedgerDetails.ledger.totalPaid)}</div>
@@ -333,7 +333,7 @@ export function MemberLedger() {
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Payment Type</label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => {

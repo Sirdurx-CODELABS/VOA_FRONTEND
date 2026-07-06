@@ -77,7 +77,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Top stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
         <StatCard title="Total Members" value={memberStats?.total ?? '—'} icon={Users} color="blue" />
         <StatCard title="Active" value={memberStats?.active ?? '—'} icon={UserCheck} color="green" />
         <StatCard title="Pending Approval" value={memberStats?.pending ?? '—'} icon={Clock} color="orange" />

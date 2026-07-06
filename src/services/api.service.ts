@@ -341,7 +341,7 @@ export const organizationService = {
   delete: (id: string) => api.delete(`/organizations/${id}`),
   uploadLogo: (formData: FormData) => api.put('/organizations/me/logo', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
-    onUploadProgress: (e: ProgressEvent) => {
+    onUploadProgress: (_e: unknown) => {
       // progress tracking available if needed
     },
   }),

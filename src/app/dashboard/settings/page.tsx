@@ -1,7 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
-import { useUIStore } from '@/store/uiStore';
+import { useUIStore, type AccentColor } from '@/store/uiStore';
 import { authService } from '@/services/auth.service';
 import { userService, childService } from '@/services/api.service';
 import { Child } from '@/types';
@@ -79,7 +79,7 @@ const inputCls = 'w-full rounded-xl border border-slate-300 dark:border-slate-70
 
 export default function SettingsPage() {
   const { user, updateUser } = useAuthStore();
-  const { darkMode, toggleDarkMode } = useUIStore();
+  const { theme, setTheme, accentColor, setAccentColor } = useUIStore();
   const [activeTab, setActiveTab] = useState<TabId>('account');
   const [showIDCard, setShowIDCard] = useState(false);
   const [showPw, setShowPw] = useState({ current: false, new: false, confirm: false });
@@ -554,21 +554,54 @@ export default function SettingsPage() {
 
       {/* ── Appearance Tab ────────────────────────────────────────────── */}
       {activeTab === 'appearance' && (
-        <Card>
-          <CardHeader><CardTitle className="flex items-center gap-2"><Palette className="w-4 h-4 text-purple-500" /> Appearance</CardTitle></CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-3 gap-3">
-              {[{ id: 'light', label: 'Light', icon: Sun, active: !darkMode }, { id: 'dark', label: 'Dark', icon: Moon, active: darkMode }, { id: 'system', label: 'System', icon: Monitor, active: false }].map(({ id, label, icon: Icon, active }) => (
-                <button key={id} onClick={() => { if (id === 'light' && darkMode) toggleDarkMode(); if (id === 'dark' && !darkMode) toggleDarkMode(); }}
-                  className={cn('flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all', active ? 'border-[#1E3A8A] bg-[#1E3A8A]/5 dark:bg-[#1E3A8A]/20' : 'border-slate-200 dark:border-slate-700 hover:border-slate-300')}>
-                  <Icon className={cn('w-5 h-5', active ? 'text-[#1E3A8A] dark:text-blue-400' : 'text-slate-400')} />
-                  <span className={cn('text-xs font-semibold', active ? 'text-[#1E3A8A] dark:text-blue-400' : 'text-slate-500')}>{label}</span>
-                  {active && <div className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />}
-                </button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <div className="space-y-6">
+          <Card>
+            <CardHeader><CardTitle className="flex items-center gap-2"><Monitor className="w-4 h-4 text-blue-500" /> Theme Mode</CardTitle></CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {([{ id: 'system', label: 'System', icon: Monitor }, { id: 'light', label: 'Light', icon: Sun }, { id: 'dark', label: 'Dark', icon: Moon }] as const).map(({ id, label, icon: Icon }) => {
+                  const active = theme === id;
+                  return (
+                    <button key={id} onClick={() => setTheme(id)}
+                      className={cn('flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all', active ? 'border-primary bg-[var(--accent-light-bg)]' : 'border-slate-200 dark:border-slate-700 hover:border-slate-300')}>
+                      <Icon className={cn('w-5 h-5', active ? 'text-primary' : 'text-slate-400')} />
+                      <span className={cn('text-xs font-semibold', active ? 'text-primary' : 'text-slate-500')}>{label}</span>
+                      {active && <div className="w-1.5 h-1.5 rounded-full bg-success" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader><CardTitle className="flex items-center gap-2"><Palette className="w-4 h-4 text-purple-500" /> Accent Color</CardTitle></CardHeader>
+            <CardContent>
+              <p className="text-xs text-slate-500 mb-4">Choose a primary accent color for the dashboard.</p>
+              <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
+                {[
+                  { id: 'blue' as AccentColor, label: 'Blue', class: 'bg-[#1E3A8A]' },
+                  { id: 'green' as AccentColor, label: 'Green', class: 'bg-[#059669]' },
+                  { id: 'purple' as AccentColor, label: 'Purple', class: 'bg-[#7C3AED]' },
+                  { id: 'orange' as AccentColor, label: 'Orange', class: 'bg-[#EA580C]' },
+                  { id: 'red' as AccentColor, label: 'Red', class: 'bg-[#DC2626]' },
+                  { id: 'teal' as AccentColor, label: 'Teal', class: 'bg-[#0D9488]' },
+                  { id: 'indigo' as AccentColor, label: 'Indigo', class: 'bg-[#4F46E5]' },
+                  { id: 'pink' as AccentColor, label: 'Pink', class: 'bg-[#DB2777]' },
+                ].map(({ id, label, class: bgClass }) => {
+                  const active = accentColor === id;
+                  return (
+                    <button key={id} onClick={() => setAccentColor(id)}
+                      className={cn('flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all', active ? 'border-primary bg-[var(--accent-light-bg)]' : 'border-slate-200 dark:border-slate-700 hover:border-slate-300')}>
+                      <div className={cn('w-8 h-8 rounded-full shadow-sm', bgClass)} />
+                      <span className={cn('text-[10px] font-semibold', active ? 'text-primary' : 'text-slate-500')}>{label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* ── Legal Tab ─────────────────────────────────────────────────── */}
@@ -602,7 +635,7 @@ export default function SettingsPage() {
             <input type="date" value={childForm.childDob} max={new Date().toISOString().split('T')[0]} onChange={e => setChildForm(p => ({ ...p, childDob: e.target.value }))} className={inputCls} />
             {childForm.childDob && <p className="text-xs text-[#1E3A8A] dark:text-blue-400 mt-1">Age: {calcAge(childForm.childDob)} years old</p>}
           </Field>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Field label="Gender">
               <select value={childForm.childGender} onChange={e => setChildForm(p => ({ ...p, childGender: e.target.value }))} className={inputCls}>
                 <option value="male">Male</option>

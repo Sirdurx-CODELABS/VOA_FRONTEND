@@ -233,7 +233,7 @@ export default function AnnouncementsPage() {
         <Input label="Title" placeholder="Announcement title" error={errors.title?.message} {...register('title', { required: 'Required' })} />
         <Textarea label="Message" placeholder="Write your announcement..." rows={4} error={errors.message?.message} {...register('message', { required: 'Required' })} />
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Select label="Visibility" options={[
             { value: 'internal', label: 'Internal (All members)' },
             { value: 'public', label: 'Public (Website)' },

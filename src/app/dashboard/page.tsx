@@ -558,7 +558,7 @@ export default function DashboardPage() {
       {isPRO && rd.announcements && (
         <div className="space-y-3">
           <SectionHead action={<ViewAllLink href="/dashboard/announcements" />}>Announcements Overview</SectionHead>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <StatPill label="Total Posts" value={(rd.announcements as { total: number }).total}        icon={Megaphone}   color="blue" />
             <StatPill label="Published"   value={(rd.announcements as { published: number }).published} icon={CheckCircle} color="green" />
             <StatPill label="Drafts"      value={(rd.announcements as { draft: number }).draft}         icon={FileText}    color="orange" />
@@ -570,7 +570,7 @@ export default function DashboardPage() {
       {isWelfare && rd.welfare && (
         <div className="space-y-3">
           <SectionHead action={<ViewAllLink href="/dashboard/welfare" />}>Welfare Requests</SectionHead>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <StatPill label="Pending"     value={(rd.welfare as { pending: number }).pending}       icon={AlertCircle} color="red" />
             <StatPill label="In Progress" value={(rd.welfare as { inProgress: number }).inProgress} icon={Clock}       color="orange" />
             <StatPill label="Resolved"    value={(rd.welfare as { resolved: number }).resolved}     icon={CheckCircle} color="green" />

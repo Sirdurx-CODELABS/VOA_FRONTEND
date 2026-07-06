@@ -6,14 +6,13 @@ import {
   CheckSquare, Share2, Building2,
 } from 'lucide-react';
 import { Permission, PERMISSIONS } from '@/lib/permissions';
-import { Role } from '@/types';
 
 export interface SidebarChild {
   label: string;
   href: string;
-  permission?: Permission;
-  roles?: Role[];
+  permission: Permission;
   alwaysShow?: boolean;
+  roles?: string[];
 }
 
 export interface SidebarItem {
@@ -22,12 +21,12 @@ export interface SidebarItem {
   href?: string;
   icon: React.ElementType;
   permission?: Permission;
-  roles?: Role[];
-  alwaysShow?: boolean;
-  adminOnly?: boolean;
   badgeKey?: string;
   children?: SidebarChild[];
   section?: string;
+  adminOnly?: boolean;
+  alwaysShow?: boolean;
+  roles?: string[];
 }
 
 export const SIDEBAR_CONFIG: SidebarItem[] = [
@@ -37,7 +36,7 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
     label: 'Dashboard',
     href: '/dashboard',
     icon: LayoutDashboard,
-    alwaysShow: true,
+    permission: PERMISSIONS.VIEW_DASHBOARD,
     section: 'Main',
   },
   {
@@ -54,7 +53,6 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
     id: 'users',
     label: 'Users',
     icon: Users,
-    permission: PERMISSIONS.VIEW_ALL_USERS,
     section: 'People',
     children: [
       { label: 'All Members',  href: '/dashboard/users',                 permission: PERMISSIONS.VIEW_ALL_USERS },
@@ -63,31 +61,24 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
     ],
   },
 
-  // ── PROGRAMS — only for authorized roles ─────────────────────────────────
+  // ── OPERATIONS ────────────────────────────────────────────────────────────
   {
     id: 'programs',
     label: 'Programs',
     icon: Calendar,
-    permission: PERMISSIONS.MANAGE_PROGRAMS,
-    section: 'Operations',
-    roles: ['super_admin', 'chairman', 'vice_chairman', 'secretary', 'program_coordinator'],
     children: [
       { label: 'All Programs',   href: '/dashboard/programs',               permission: PERMISSIONS.VIEW_PROGRAMS },
       { label: 'Create Program', href: '/dashboard/programs?action=create', permission: PERMISSIONS.MANAGE_PROGRAMS },
     ],
   },
-
-  // ── ACTIVITIES ────────────────────────────────────────────────────────────
   {
     id: 'activities',
     label: 'Activities',
     icon: Activity,
-    alwaysShow: true,
-    section: 'Operations',
     children: [
-      { label: 'All Activities',   href: '/dashboard/activities',               alwaysShow: true },
-      { label: 'My Invitations',   href: '/dashboard/activities?view=mine',     alwaysShow: true },
-      { label: 'Create Activity',  href: '/dashboard/activities?action=create', roles: ['super_admin', 'chairman', 'vice_chairman', 'secretary', 'program_coordinator'] as Role[] },
+      { label: 'All Activities',   href: '/dashboard/activities',               permission: PERMISSIONS.VIEW_DASHBOARD },
+      { label: 'My Invitations',   href: '/dashboard/activities?view=mine',     permission: PERMISSIONS.VIEW_DASHBOARD },
+      { label: 'Create Activity',  href: '/dashboard/activities?action=create', permission: PERMISSIONS.MANAGE_PROGRAMS },
       { label: 'Activity Reports', href: '/dashboard/activities/reports',        permission: PERMISSIONS.VIEW_REPORTS },
     ],
   },
@@ -95,20 +86,19 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
     id: 'attendance',
     label: 'Attendance',
     icon: ClipboardCheck,
-    alwaysShow: true,
     children: [
-      { label: 'My Attendance',     href: '/dashboard/attendance',            alwaysShow: true },
+      { label: 'My Attendance',     href: '/dashboard/attendance',            permission: PERMISSIONS.VIEW_ATTENDANCE },
       { label: 'Manage Attendance', href: '/dashboard/attendance?view=admin', permission: PERMISSIONS.MANAGE_ATTENDANCE },
     ],
   },
 
-  // ── GALLERY ───────────────────────────────────────────────────────────────
+  // ── COMMUNITY ──────────────────────────────────────────────────────────────
   {
     id: 'gallery',
     label: 'VOA Gallery',
     href: '/dashboard/gallery',
     icon: Image,
-    alwaysShow: true,
+    permission: PERMISSIONS.VIEW_GALLERY,
     section: 'Community',
   },
 
@@ -117,13 +107,11 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
     id: 'finance',
     label: 'Finance',
     icon: DollarSign,
-    permission: PERMISSIONS.VIEW_ACCOUNTS as Permission,
-    section: 'Finance',
     badgeKey: 'pendingTransactions',
     children: [
-      { label: 'Contributions',   href: '/dashboard/finance',                   permission: PERMISSIONS.VIEW_CONTRIBUTIONS as Permission },
+      { label: 'Contributions',   href: '/dashboard/finance',                   permission: PERMISSIONS.VIEW_CONTRIBUTIONS },
       { label: 'Transactions',    href: '/dashboard/finance?tab=transactions',   permission: PERMISSIONS.VIEW_FINANCE },
-      { label: 'Accounts',        href: '/dashboard/finance?tab=accounts',       permission: PERMISSIONS.MANAGE_ACCOUNTS as Permission },
+      { label: 'Accounts',        href: '/dashboard/finance?tab=accounts',       permission: PERMISSIONS.MANAGE_ACCOUNTS },
     ],
   },
   {
@@ -134,31 +122,28 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
     permission: PERMISSIONS.VIEW_FINANCE,
   },
 
-  // ── CONTENT — Super Admin only ───────────────────────────────────────────
+  // ── CONTENT ───────────────────────────────────────────────────────────────
   {
     id: 'content',
     label: 'Content',
     icon: PenTool,
-    roles: ['super_admin'],
     section: 'Content',
     children: [
-      { label: 'Blog', href: '/dashboard/content/blogs', roles: ['super_admin'] },
-      { label: 'Events', href: '/dashboard/content/events', roles: ['super_admin'] },
-      { label: 'Projects', href: '/dashboard/content/projects', roles: ['super_admin'] },
-      { label: 'Gallery', href: '/dashboard/gallery', alwaysShow: true },
-      { label: 'Team', href: '/dashboard/content/team', roles: ['super_admin'] },
-      { label: 'Contact', href: '/dashboard/content/contact', roles: ['super_admin'] },
+      { label: 'Blog',    href: '/dashboard/content/blogs',    permission: PERMISSIONS.MANAGE_BLOGS },
+      { label: 'Events',  href: '/dashboard/content/events',   permission: PERMISSIONS.MANAGE_EVENTS },
+      { label: 'Projects',href: '/dashboard/content/projects',  permission: PERMISSIONS.MANAGE_PROJECTS },
+      { label: 'Team',    href: '/dashboard/content/team',     permission: PERMISSIONS.MANAGE_TEAM },
+      { label: 'Contact', href: '/dashboard/content/contact',  permission: PERMISSIONS.MANAGE_CONTACT },
     ],
   },
   {
     id: 'announcements',
     label: 'Announcements',
     icon: Megaphone,
-    permission: PERMISSIONS.VIEW_ANNOUNCEMENTS,
     children: [
       { label: 'All Announcements', href: '/dashboard/announcements',                      permission: PERMISSIONS.VIEW_ANNOUNCEMENTS },
-      { label: 'Create Post',         href: '/dashboard/announcements?action=create',        permission: PERMISSIONS.MANAGE_ANNOUNCEMENTS },
-      { label: 'Public Posts',        href: '/dashboard/announcements?visibility=public', alwaysShow: true },
+      { label: 'Create Post',       href: '/dashboard/announcements?action=create',        permission: PERMISSIONS.MANAGE_ANNOUNCEMENTS },
+      { label: 'Public Posts',      href: '/dashboard/announcements?visibility=public',   permission: PERMISSIONS.VIEW_ANNOUNCEMENTS },
     ],
   },
 
@@ -167,16 +152,15 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
     id: 'welfare',
     label: 'Welfare',
     icon: Heart,
-    permission: PERMISSIONS.SUBMIT_WELFARE_REQUEST,
     section: 'Welfare',
     badgeKey: 'pendingWelfare',
     children: [
       { label: 'All Requests',   href: '/dashboard/welfare',               permission: PERMISSIONS.MANAGE_WELFARE },
-      { label: 'Submit Request', href: '/dashboard/welfare?action=submit', alwaysShow: true },
+      { label: 'Submit Request', href: '/dashboard/welfare?action=submit', permission: PERMISSIONS.SUBMIT_WELFARE_REQUEST },
     ],
   },
 
-  // ── TASKS & APPROVALS ──────────────────────────────────────────────────────
+  // ── TASKS ─────────────────────────────────────────────────────────────────
   {
     id: 'document_approvals',
     label: 'Document Approvals',
@@ -184,7 +168,7 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
     icon: CheckSquare,
     section: 'Tasks',
     badgeKey: 'pendingApprovals',
-    alwaysShow: true,
+    permission: PERMISSIONS.VIEW_REPORTS,
   },
   {
     id: 'document_generator',
@@ -192,7 +176,23 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
     href: '/dashboard/documents',
     icon: FileText,
     section: 'Tasks',
-    roles: ['super_admin', 'chairman'],
+    permission: PERMISSIONS.VIEW_REPORTS,
+  },
+  {
+    id: 'reports',
+    label: 'Reports',
+    href: '/dashboard/reports',
+    icon: ClipboardList,
+    section: 'Tasks',
+    permission: PERMISSIONS.VIEW_REPORTS,
+  },
+  {
+    id: 'constitution',
+    label: 'Constitution',
+    href: '/constitution',
+    icon: BookOpen,
+    section: 'Tasks',
+    permission: PERMISSIONS.VIEW_CONSTITUTION,
   },
 
   // ── WORKFLOW ──────────────────────────────────────────────────────────────
@@ -202,25 +202,22 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
     href: '/dashboard/positions',
     icon: Briefcase,
     section: 'Workflow',
-    // member (submit), membership_coordinator (review), chairman/super_admin (approve)
     permission: PERMISSIONS.SUBMIT_POSITION_APPLICATION,
-    roles: ['member', 'membership_coordinator', 'chairman', 'super_admin'],
   },
   {
     id: 'role_changes',
     label: 'Role Change Requests',
     href: '/dashboard/role-changes',
     icon: GitBranch,
-    // membership_coordinator (initiate), chairman/super_admin (approve)
-    roles: ['membership_coordinator', 'chairman', 'super_admin'],
+    section: 'Workflow',
+    permission: PERMISSIONS.INITIATE_ROLE_CHANGE,
   },
 
-  // ── ANALYTICS ─────────────────────────────────────────────────────────────
+  // ── INSIGHTS ──────────────────────────────────────────────────────────────
   {
     id: 'analytics',
     label: 'Analytics',
     icon: BarChart2,
-    permission: PERMISSIONS.VIEW_ANALYTICS,
     section: 'Insights',
     children: [
       { label: 'Overview',          href: '/dashboard/analytics',                  permission: PERMISSIONS.VIEW_ANALYTICS },
@@ -236,14 +233,13 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
     icon: Settings,
     section: 'System',
     children: [
-      { label: 'Notifications', href: '/dashboard/notifications', alwaysShow: true },
-      { label: 'Constitution', href: '/constitution', alwaysShow: true },
-      { label: 'Settings', href: '/dashboard/settings', alwaysShow: true },
-      { label: 'System Control', href: '/dashboard/admin', roles: ['super_admin'] },
-      { label: 'System Logs', href: '/dashboard/admin?tab=logs', roles: ['super_admin'] },
-      { label: 'Document Templates', href: '/dashboard/document-templates', roles: ['super_admin', 'chairman'] },
-      { label: 'Social Channels', href: '/dashboard/admin?tab=socialChannels', roles: ['super_admin'] },
-      { label: 'Organizations', href: '/dashboard/admin/organizations', roles: ['super_admin'] },
+      { label: 'Notifications',      href: '/dashboard/notifications',                permission: PERMISSIONS.VIEW_DASHBOARD },
+      { label: 'Settings',           href: '/dashboard/settings',                     permission: PERMISSIONS.EDIT_OWN_PROFILE },
+      { label: 'System Control',     href: '/dashboard/admin',                        permission: PERMISSIONS.VIEW_SYSTEM_LOGS },
+      { label: 'System Logs',        href: '/dashboard/admin?tab=logs',               permission: PERMISSIONS.VIEW_SYSTEM_LOGS },
+      { label: 'Document Templates', href: '/dashboard/document-templates',           permission: PERMISSIONS.MANAGE_SETTINGS },
+      { label: 'Social Channels',    href: '/dashboard/admin?tab=socialChannels',     permission: PERMISSIONS.MANAGE_SETTINGS },
+      { label: 'Organizations',      href: '/dashboard/admin/organizations',           permission: PERMISSIONS.MANAGE_ORGANIZATION },
     ],
   },
 ];

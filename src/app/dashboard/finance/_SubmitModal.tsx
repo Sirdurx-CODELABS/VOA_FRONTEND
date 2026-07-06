@@ -143,7 +143,7 @@ export function SubmitContributionModal({ open, onClose, onSuccess, minimum, gen
         {/* Amount selection */}
         <div>
           <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Contribution Amount</label>
-          <div className="grid grid-cols-2 gap-3 mb-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
             <button type="button" onClick={() => { setUseMinimum(true); setAmount(''); setAmountError(''); }}
               className={`flex flex-col items-center gap-1.5 p-4 rounded-2xl border-2 transition-all ${useMinimum ? 'border-[#1E3A8A] bg-[#1E3A8A]/5 dark:bg-[#1E3A8A]/20' : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'}`}>
               <CheckCircle className={`w-5 h-5 ${useMinimum ? 'text-[#1E3A8A]' : 'text-slate-300'}`} />

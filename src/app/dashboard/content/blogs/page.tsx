@@ -181,7 +181,7 @@ export default function BlogsPage() {
 
       <Textarea label="Content" placeholder="Blog content" rows={10} error={errors.content?.message} {...register('content', { required: 'Required' })} />
       
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Input label="Category" placeholder="e.g., News, Announcements" {...register('category')} />
         <Select label="Status" options={[{ value: 'draft', label: 'Draft' }, { value: 'published', label: 'Published' }]} {...register('status')} />
       </div>

@@ -397,7 +397,7 @@ export function ContributionPanel() {
           {/* ── Payment Mode Selector ─────────────────────────────────────── */}
           <div>
             <label className={labelCls}>Payment Mode</label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {([
                 {
                   mode: 'required' as PaymentMode,

@@ -177,7 +177,7 @@ export default function ProjectsPage() {
       
       <div className="space-y-2">
         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Images</label>
-        <div className="grid grid-cols-5 gap-2 mb-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mb-3">
           {existingImages.map((img, i) => (
             <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
               <img src={img} alt="" className="w-full h-full object-cover" />
@@ -209,17 +209,17 @@ export default function ProjectsPage() {
       <Textarea label="Description" placeholder="Detailed description" rows={4} {...register('description')} />
       <Textarea label="Impact" placeholder="Project impact" rows={2} {...register('impact')} />
       
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Input label="Category" placeholder="e.g., Education, Community" {...register('category')} />
         <Input label="Location" placeholder="Project location" {...register('location')} />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Input label="Start Date" type="date" {...register('startDate')} />
         <Input label="End Date" type="date" {...register('endDate')} />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Input label="Budget" type="number" placeholder="0" {...register('budget', { valueAsNumber: true })} />
         <Select label="Status" options={[
           { value: 'planning', label: 'Planning' },
@@ -286,7 +286,7 @@ export default function ProjectsPage() {
         {viewModal && (
           <div className="space-y-4">
             {viewModal.images && viewModal.images.length > 0 && (
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {viewModal.images.map((img, i) => (
                   <img key={i} src={img} alt="" className="w-full aspect-square object-cover rounded-lg" />
                 ))}
@@ -304,7 +304,7 @@ export default function ProjectsPage() {
                 <p className="text-gray-900 dark:text-white whitespace-pre-wrap">{viewModal.description}</p>
               </div>
             )}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {viewModal.category && (
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Category</p>

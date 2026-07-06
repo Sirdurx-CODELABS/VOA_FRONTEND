@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { userService } from '@/services/api.service';
 import { User } from '@/types';
 import { useAuthStore } from '@/store/authStore';
@@ -43,7 +43,7 @@ export default function UsersPage() {
       setUsers(res.data.data);
       setTotalPages(res.data.pagination.totalPages);
     } finally { setLoading(false); }
-  }, [page, search, roleFilter, statusFilter]);
+  }, [page, search, roleFilter, statusFilter, membershipFilter]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -96,7 +96,7 @@ export default function UsersPage() {
   const pendingCount = users.filter(u => u.status === 'pending').length;
   const assignableRoles = me ? (ASSIGNABLE_ROLES[me.role] || ROLES) : ROLES;
 
-  const columns = [
+  const columns = useMemo(() => [
     {
       key: 'fullName', header: 'Member',
       render: (u: User) => (
@@ -188,7 +188,7 @@ export default function UsersPage() {
         </div>
       ),
     },
-  ];
+  ], [me, canManage, canAssign]);
 
   return (
     <div className="space-y-5 animate-slide-up">

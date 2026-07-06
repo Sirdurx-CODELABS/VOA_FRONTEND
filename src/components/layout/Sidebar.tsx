@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useMemo, memo } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
@@ -17,30 +17,30 @@ import {
 } from 'lucide-react';
 
 /* ── Badge pill ──────────────────────────────────────────────────────────── */
-function Badge({ count }: { count: number }) {
+const Badge = memo(function Badge({ count }: { count: number }) {
   if (!count) return null;
   return (
     <span className={cn(
       'ml-auto min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-extrabold flex items-center justify-center shrink-0',
-      'bg-[#F97316] text-white badge-pulse'
+      'bg-cta text-white badge-pulse'
     )}>
       {count > 99 ? '99+' : count}
     </span>
   );
-}
+});
 
 /* ── Section divider ─────────────────────────────────────────────────────── */
-function SectionLabel({ label, open }: { label: string; open: boolean }) {
+const SectionLabel = memo(function SectionLabel({ label, open }: { label: string; open: boolean }) {
   if (!open) return <div className="mx-2 my-1.5 h-px bg-white/10" />;
   return (
     <div className="px-3 pt-4 pb-1">
       <p className="text-[9px] font-extrabold text-white/30 uppercase tracking-[0.2em]">{label}</p>
     </div>
   );
-}
+});
 
 /* ── Single nav item (no children) ──────────────────────────────────────── */
-function NavLink({
+const NavLink = memo(function NavLink({
   item, active, sidebarOpen, badge,
 }: {
   item: SidebarItem; active: boolean; sidebarOpen: boolean; badge?: number;
@@ -56,22 +56,25 @@ function NavLink({
         'sidebar-item-hover relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium',
         'transition-all duration-150 group',
         active
-          ? 'bg-[#F97316]/20 text-white border border-[#F97316]/30 shadow-sm'
-          : isAdmin
-            ? 'text-amber-300/80 hover:bg-amber-500/10 hover:text-amber-300'
-            : 'text-white/65 hover:bg-[#3B82F6]/20 hover:text-white',
+          ? 'text-white border shadow-sm'
+          : 'text-white/65 hover:bg-white/10 hover:text-white',
         !sidebarOpen && 'justify-center px-2',
       )}
+      style={active ? {
+        backgroundColor: 'color-mix(in srgb, var(--accent) 20%, transparent)',
+        borderColor: 'color-mix(in srgb, var(--accent) 30%, transparent)',
+      } : undefined}
     >
       {/* Active left bar */}
       {active && (
-        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-[#F97316] rounded-r-full" />
+        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full"
+          style={{ backgroundColor: 'var(--accent)' }} />
       )}
 
       <Icon className={cn(
         'w-[18px] h-[18px] shrink-0 transition-colors duration-150',
-        active ? 'text-[#F97316]' : isAdmin ? 'text-amber-400' : 'text-white/50 group-hover:text-white',
-      )} />
+        active ? 'text-white' : 'text-white/50 group-hover:text-white',
+      )} style={active ? { color: 'var(--accent)' } : undefined} />
 
       {sidebarOpen && (
         <>
@@ -82,14 +85,14 @@ function NavLink({
 
       {/* Collapsed badge dot */}
       {!sidebarOpen && !!badge && (
-        <span className="absolute top-1 right-1 w-2 h-2 bg-[#F97316] rounded-full" />
+        <span className="absolute top-1 right-1 w-2 h-2 bg-cta rounded-full" />
       )}
     </Link>
   );
-}
+});
 
 /* ── Expandable group item ───────────────────────────────────────────────── */
-function NavGroup({
+const NavGroup = memo(function NavGroup({
   item, sidebarOpen, badge, user,
 }: {
   item: SidebarItem; sidebarOpen: boolean; badge?: number; user: User | null;
@@ -115,7 +118,7 @@ function NavGroup({
   // Auto-expand if a child is active
   useEffect(() => {
     if (anyChildActive && !isExpanded) toggleExpanded(item.id);
-  }, [pathname]); // eslint-disable-line
+  }, [pathname, anyChildActive, isExpanded, item.id, toggleExpanded]);
 
   if (!sidebarOpen) {
     // Collapsed: show icon only, clicking navigates to first child
@@ -125,14 +128,22 @@ function NavGroup({
         title={item.label}
         className={cn(
           'sidebar-item-hover relative flex items-center justify-center px-2 py-2.5 rounded-xl transition-all duration-150 group',
-          anyChildActive
-            ? 'bg-[#F97316]/20 text-white border border-[#F97316]/30'
-            : 'text-white/65 hover:bg-[#3B82F6]/20 hover:text-white',
+        anyChildActive
+          ? 'text-white border'
+          : 'text-white/65 hover:bg-white/10 hover:text-white',
         )}
+        style={anyChildActive ? {
+          backgroundColor: 'color-mix(in srgb, var(--accent) 20%, transparent)',
+          borderColor: 'color-mix(in srgb, var(--accent) 30%, transparent)',
+        } : undefined}
       >
-        {anyChildActive && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-[#F97316] rounded-r-full" />}
-        <Icon className={cn('w-[18px] h-[18px] shrink-0', anyChildActive ? 'text-[#F97316]' : 'text-white/50 group-hover:text-white')} />
-        {!!badge && <span className="absolute top-1 right-1 w-2 h-2 bg-[#F97316] rounded-full" />}
+        {anyChildActive && (
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full"
+            style={{ backgroundColor: 'var(--accent)' }} />
+        )}
+        <Icon className={cn('w-[18px] h-[18px] shrink-0', anyChildActive ? 'text-white' : 'text-white/50 group-hover:text-white')}
+          style={anyChildActive ? { color: 'var(--accent)' } : undefined} />
+        {!!badge && <span className="absolute top-1 right-1 w-2 h-2 bg-cta rounded-full" />}
       </Link>
     );
   }
@@ -145,12 +156,16 @@ function NavGroup({
         className={cn(
           'sidebar-item-hover w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium',
           'transition-all duration-150 group',
-          anyChildActive
-            ? 'bg-[#F97316]/10 text-white'
-            : 'text-white/65 hover:bg-[#3B82F6]/20 hover:text-white',
+        anyChildActive
+          ? 'text-white'
+          : 'text-white/65 hover:bg-white/10 hover:text-white',
         )}
+        style={anyChildActive ? {
+          backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+        } : undefined}
       >
-        <Icon className={cn('w-[18px] h-[18px] shrink-0', anyChildActive ? 'text-[#F97316]' : 'text-white/50 group-hover:text-white')} />
+        <Icon className={cn('w-[18px] h-[18px] shrink-0', anyChildActive ? 'text-white' : 'text-white/50 group-hover:text-white')}
+          style={anyChildActive ? { color: 'var(--accent)' } : undefined} />
         <span className="truncate flex-1 text-left">{item.label}</span>
         <Badge count={badge || 0} />
         <ChevronRight className={cn(
@@ -171,11 +186,15 @@ function NavGroup({
                 className={cn(
                   'flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150',
                   childActive
-                    ? 'bg-[#F97316]/20 text-white'
+                    ? 'text-white'
                     : 'text-white/50 hover:bg-white/10 hover:text-white',
                 )}
+                style={childActive ? {
+                  backgroundColor: 'color-mix(in srgb, var(--accent) 20%, transparent)',
+                } : undefined}
               >
-                <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', childActive ? 'bg-[#F97316]' : 'bg-white/20')} />
+                <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', childActive ? 'bg-white' : 'bg-white/20')}
+                  style={childActive ? { backgroundColor: 'var(--accent)' } : undefined} />
                 {child.label}
               </Link>
             );
@@ -184,14 +203,14 @@ function NavGroup({
       )}
     </div>
   );
-}
+});
 
 /* ── Main Sidebar ────────────────────────────────────────────────────────── */
-export function Sidebar() {
+export const Sidebar = memo(function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, organization, logout } = useAuthStore();
-  const { sidebarOpen, toggleSidebar, setSidebar, badgeCounts, setBadgeCounts } = useUIStore();
+  const { sidebarOpen, toggleSidebar, badgeCounts, setBadgeCounts } = useUIStore();
 
   // Fetch badge counts periodically
   const fetchBadges = useCallback(async () => {
@@ -218,14 +237,14 @@ export function Sidebar() {
     return () => clearInterval(interval);
   }, [fetchBadges]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     logout();
     toast.success('See you soon! 👋');
     router.push('/login');
-  };
+  }, [logout, router]);
 
   // Determine visibility
-  const isVisible = (item: SidebarItem): boolean => {
+  const isVisible = useCallback((item: SidebarItem): boolean => {
     if (!user) return false;
     if (item.adminOnly) return user.role === 'super_admin';
     if (item.alwaysShow) return true;
@@ -241,45 +260,38 @@ export function Sidebar() {
       });
     }
     return false;
-  };
+  }, [user]);
 
-  const getBadge = (key?: string): number => {
+  const getBadge = useCallback((key?: string): number => {
     if (!key) return 0;
     return (badgeCounts as unknown as Record<string, number>)[key] || 0;
-  };
+  }, [badgeCounts]);
 
   // Group items by section
-  const sections: { label: string; items: SidebarItem[] }[] = [];
-  let currentSection = '';
-  const visible = SIDEBAR_CONFIG.filter(isVisible);
-
-  visible.forEach(item => {
-    const sec = item.section || '';
-    if (sec !== currentSection) {
-      currentSection = sec;
-      sections.push({ label: sec, items: [] });
-    }
-    sections[sections.length - 1].items.push(item);
-  });
+  const sections = useMemo(() => {
+    const result: { label: string; items: SidebarItem[] }[] = [];
+    let currentSection = '';
+    const visible = SIDEBAR_CONFIG.filter(isVisible);
+    visible.forEach(item => {
+      const sec = item.section || '';
+      if (sec !== currentSection) {
+        currentSection = sec;
+        result.push({ label: sec, items: [] });
+      }
+      result[result.length - 1].items.push(item);
+    });
+    return result;
+  }, [isVisible]);
 
   const roleLabel = user ? `${user.isVice ? 'Vice ' : ''}${user.role.replace(/_/g, ' ')}` : '';
-  const roleColor = user?.role === 'super_admin' ? 'text-amber-400' : 'text-[#F97316]';
+  const roleColor = user?.role === 'super_admin' ? 'text-amber-400' : 'text-cta';
 
   return (
     <>
-      {/* Mobile overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-20 bg-slate-900/60 backdrop-blur-sm lg:hidden"
-          onClick={() => setSidebar(false)}
-        />
-      )}
-
       <aside className={cn(
-        'fixed top-0 left-0 h-full z-30 flex flex-col',
-        'bg-[#1E3A8A] transition-all duration-300 ease-in-out',
-        // Mobile: full width drawer (slides in/out), hidden when closed
-        // lg: always visible, collapses to icon-only
+        'fixed top-0 left-0 h-full z-30 flex-col',
+        'bg-sidebar transition-all duration-300 ease-in-out',
+        'hidden lg:flex',
         sidebarOpen
           ? 'w-64 translate-x-0'
           : 'w-64 -translate-x-full lg:translate-x-0 lg:w-[70px] overflow-hidden',
@@ -297,7 +309,7 @@ export function Sidebar() {
                   className="w-[44px] h-[44px] object-contain rounded-xl" />
                 <div className="flex flex-col leading-none">
                   <span className="text-white font-extrabold text-base tracking-tight">{organization.shortName || 'VOA'}</span>
-                  <span className="text-[#F97316] font-medium text-[10px] tracking-widest uppercase">Management</span>
+                  <span className="text-cta font-medium text-[10px] tracking-widest uppercase">Management</span>
                 </div>
               </div>
             ) : <VOALogo onDark size={44} />
@@ -414,4 +426,4 @@ export function Sidebar() {
       </aside>
     </>
   );
-}
+});

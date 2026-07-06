@@ -1,29 +1,104 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* Make dark: variant respond to .dark class on <html> (not prefers-color-scheme) */
+@variant dark (&:where(.dark, .dark *));
+
 /* ─── VOA Brand Token System ─────────────────────────────────────────────── */
 @theme {
-  --color-brand-blue:   #1E3A8A;
-  --color-brand-orange: #F97316;
+  --color-brand-blue:   var(--brand-primary);
+  --color-brand-orange: var(--brand-secondary);
   --color-brand-green:  #22C55E;
-  --color-primary:      #1E3A8A;
-  --color-cta:          #F97316;
+  --color-primary:      var(--accent);
+  --color-cta:          var(--brand-secondary);
   --color-success:      #22C55E;
   --color-danger:       #EF4444;
   --color-warning:      #F59E0B;
   --color-info:         #3B82F6;
+
+  --color-sidebar:      var(--bg-sidebar);
+  --color-card-bg:      var(--bg-card);
+  --color-input-bg:     var(--bg-input);
+  --color-main-bg:      var(--bg-main);
+  --color-navbar-bg:    var(--bg-navbar);
+  --color-modal-bg:     var(--bg-modal);
+  --color-default:      var(--border-default);
+  --color-muted:        var(--text-muted);
+  --color-secondary:    var(--text-secondary);
+  --color-surface:      var(--bg-card);
+  --color-hover:        var(--bg-hover);
+  --color-border:       var(--border-default);
 }
+
+/* ─── Light theme (default) ──────────────────────────────────────────────── */
+:root {
+  --brand-primary:   #1E3A8A;
+  --brand-secondary: #F97316;
+  --brand-accent:    #22C55E;
+  --accent: #1E3A8A;
+  --accent-rgb: 30, 58, 138;
+  --accent-hover: #1E40AF;
+  --accent-light-bg: color-mix(in srgb, var(--accent) 8%, transparent);
+  --accent-ring: color-mix(in srgb, var(--accent) 30%, transparent);
+  --accent-border: color-mix(in srgb, var(--accent) 20%, transparent);
+
+  --bg-main:       #F8FAFC;
+  --bg-card:       #FFFFFF;
+  --bg-input:      #FFFFFF;
+  --bg-sidebar:    var(--brand-primary);
+  --bg-navbar:     #FFFFFF;
+  --bg-modal:      #FFFFFF;
+  --bg-hover:      #F1F5F9;
+  --bg-muted:      #F1F5F9;
+
+  --text-primary:   #1F2937;
+  --text-secondary: #64748B;
+  --text-muted:     #94A3B8;
+  --text-on-primary:#FFFFFF;
+
+  --border-default: #E2E8F0;
+  --border-light:   #F1F5F9;
+}
+
+/* ─── Dark theme ─────────────────────────────────────────────────────────── */
+.dark {
+  --bg-main:       #0F172A;
+  --bg-card:       #1E293B;
+  --bg-input:      #1E293B;
+  --bg-sidebar:    #0F172A;
+  --bg-navbar:     #0F172A;
+  --bg-modal:      #1E293B;
+  --bg-hover:      #334155;
+  --bg-muted:      #1E293B;
+
+  --text-primary:   #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-muted:     #64748B;
+  --text-on-primary:#FFFFFF;
+
+  --border-default: #334155;
+  --border-light:   #1E293B;
+}
+
+/* Accent color presets (overridden by org branding when available) */
+html[data-accent="blue"]     { --accent: #1E3A8A; --accent-rgb: 30, 58, 138; --accent-hover: #1E40AF; }
+html[data-accent="green"]    { --accent: #059669; --accent-rgb: 5, 150, 105; --accent-hover: #047857; }
+html[data-accent="purple"]   { --accent: #7C3AED; --accent-rgb: 124, 58, 237; --accent-hover: #6D28D9; }
+html[data-accent="orange"]   { --accent: #EA580C; --accent-rgb: 234, 88, 12; --accent-hover: #C2410C; }
+html[data-accent="red"]      { --accent: #DC2626; --accent-rgb: 220, 38, 38; --accent-hover: #B91C1C; }
+html[data-accent="teal"]     { --accent: #0D9488; --accent-rgb: 13, 148, 136; --accent-hover: #0F766E; }
+html[data-accent="indigo"]   { --accent: #4F46E5; --accent-rgb: 79, 70, 229; --accent-hover: #4338CA; }
+html[data-accent="pink"]     { --accent: #DB2777; --accent-rgb: 219, 39, 119; --accent-hover: #BE185D; }
 
 /* ─── Base ───────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 
 body {
-  background-color: #F8FAFC;
-  color: #1F2937;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
 }
-.dark body { background-color: #0F172A; color: #F1F5F9; }
 
 /* ─── Scrollbar ──────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -34,7 +109,7 @@ body {
 /* ─── Keyframes ──────────────────────────────────────────────────────────── */
 @keyframes fade-in    { from { opacity: 0 }                              to { opacity: 1 } }
 @keyframes slide-up   { from { transform: translateY(12px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
-@keyframes slide-down { from { transform: translateY(-8px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+@keyframes slide-down { from { transform: translateY(-8px); opacity: 0 } to { transform: transformY(0); opacity: 1 } }
 @keyframes zoom-in    { from { transform: scale(.95); opacity: 0 }       to { transform: scale(1); opacity: 1 } }
 @keyframes bounce-in  { 0% { transform: scale(.3); opacity: 0 } 50% { transform: scale(1.05) } 70% { transform: scale(.9) } 100% { transform: scale(1); opacity: 1 } }
 @keyframes shimmer    { from { background-position: -200% 0 }            to { background-position: 200% 0 } }
@@ -68,12 +143,12 @@ body {
 }
 
 /* ─── Brand gradients ────────────────────────────────────────────────────── */
-.gradient-brand      { background: linear-gradient(135deg, #1E3A8A 0%, #F97316 100%); }
-.gradient-brand-soft { background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 55%, #F97316 100%); }
-.gradient-brand-r    { background: linear-gradient(135deg, #F97316 0%, #1E3A8A 100%); }
+.gradient-brand      { background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%); }
+.gradient-brand-soft { background: linear-gradient(135deg, var(--brand-primary) 0%, #2563EB 55%, var(--brand-secondary) 100%); }
+.gradient-brand-r    { background: linear-gradient(135deg, var(--brand-secondary) 0%, var(--brand-primary) 100%); }
 .gradient-green      { background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%); }
 .gradient-text {
-  background: linear-gradient(135deg, #1E3A8A, #F97316);
+  background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -81,7 +156,7 @@ body {
 
 /* ─── Auth image overlay ─────────────────────────────────────────────────── */
 .auth-image-overlay {
-  background: linear-gradient(160deg, rgba(30,58,138,0.88) 0%, rgba(249,115,22,0.75) 100%);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--brand-primary) 88%, transparent) 0%, color-mix(in srgb, var(--brand-secondary) 75%, transparent) 100%);
 }
 
 /* ─── Glass card ─────────────────────────────────────────────────────────── */
@@ -96,19 +171,18 @@ body {
 }
 
 /* ─── Notification type icons ────────────────────────────────────────────── */
-.notif-program     { background: rgba(30,58,138,0.1);  color: #1E3A8A; }
+.notif-program     { background: color-mix(in srgb, var(--brand-primary) 10%, transparent); color: var(--brand-primary); }
 .notif-welfare     { background: rgba(239,68,68,0.1);  color: #EF4444; }
-.notif-achievement { background: rgba(249,115,22,0.1); color: #F97316; }
+.notif-achievement { background: color-mix(in srgb, var(--brand-secondary) 10%, transparent); color: var(--brand-secondary); }
 .notif-general     { background: rgba(34,197,94,0.1);  color: #22C55E; }
 
 /* ─── Progress bar animation ─────────────────────────────────────────────── */
 .progress-bar { animation: progress 1s ease-out forwards; }
 
-/* ─── Step indicator ─────────────────────────────────────────────────────── */
-.step-active   { background: #1E3A8A; color: white; }
+/* ─── Step indicator ──────────────────────────────────────────────────────── */
+.step-active   { background: var(--brand-primary); color: white; }
 .step-done     { background: #22C55E; color: white; }
-.step-inactive { background: #E2E8F0; color: #94A3B8; }
-.dark .step-inactive { background: #1E293B; color: #475569; }
+.step-inactive { background: var(--border-default); color: var(--text-muted); }
 
 /* ─── Sidebar shimmer hover ──────────────────────────────────────────────── */
 @keyframes sidebar-shimmer {
@@ -143,6 +217,97 @@ body {
 }
 .badge-pulse { animation: badge-pulse 2s ease-in-out infinite; }
 
+
+/* ─── Safe area for notched phones ──────────────────────────────────────── */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ─── Responsive table — card view on mobile ───────────────────────────── */
+@media (max-width: 639px) {
+  .responsive-table {
+    min-width: 0 !important;
+  }
+  .responsive-table thead {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0,0,0,0) !important;
+    white-space: nowrap !important;
+    border-width: 0 !important;
+  }
+  .responsive-table tbody,
+  .responsive-table tbody tr {
+    display: block;
+    width: 100%;
+  }
+  .responsive-table tbody tr {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
+    border-radius: 0.75rem;
+  }
+  .responsive-table tbody td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border: none;
+    text-align: right;
+    gap: 0.5rem;
+  }
+  .responsive-table tbody td:not(:last-child) {
+    border-bottom: 1px solid var(--border-light);
+  }
+  .responsive-table tbody td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+}
+
+/* ─── Responsive inline grid (form rows etc) ───────────────────────────── */
+.responsive-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+@media (min-width: 480px)  { .responsive-grid { gap: 1rem; } }
+@media (min-width: 640px)  { .responsive-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .responsive-grid { grid-template-columns: repeat(3, 1fr); } }
+.responsive-grid-cols-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+@media (min-width: 480px)  { .responsive-grid-cols-2 { gap: 1rem; } }
+@media (min-width: 640px)  { .responsive-grid-cols-2 { grid-template-columns: repeat(2, 1fr); } }
+
+/* ─── Responsive form fields — stack on mobile ─────────────────────────── */
+@media (max-width: 639px) {
+  .form-row {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+/* ─── Bottom nav spacer for content area ───────────────────────────────── */
+.bottom-nav-spacer {
+  padding-bottom: 4rem;
+}
+@media (min-width: 1024px) {
+  .bottom-nav-spacer {
+    padding-bottom: 0;
+  }
+}
 
 /* ─── Responsive layout helpers ─────────────────────────────────────────── */
 

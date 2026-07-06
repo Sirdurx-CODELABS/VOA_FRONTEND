@@ -11,20 +11,19 @@ interface StatCardProps {
 }
 
 const colors = {
-  blue:   { iconBg: 'bg-[#1E3A8A]',   icon: 'text-white', accent: 'border-l-[#1E3A8A]' },
-  orange: { iconBg: 'bg-[#F97316]',   icon: 'text-white', accent: 'border-l-[#F97316]' },
-  green:  { iconBg: 'bg-[#22C55E]',   icon: 'text-white', accent: 'border-l-[#22C55E]' },
-  red:    { iconBg: 'bg-red-500',      icon: 'text-white', accent: 'border-l-red-500' },
-  purple: { iconBg: 'bg-purple-600',  icon: 'text-white', accent: 'border-l-purple-600' },
-  indigo: { iconBg: 'bg-indigo-600',  icon: 'text-white', accent: 'border-l-indigo-600' },
+  blue:   { iconBg: 'bg-primary',    icon: 'text-white', accent: 'border-l-primary' },
+  orange: { iconBg: 'bg-cta',        icon: 'text-white', accent: 'border-l-cta' },
+  green:  { iconBg: 'bg-success',    icon: 'text-white', accent: 'border-l-success' },
+  red:    { iconBg: 'bg-danger',     icon: 'text-white', accent: 'border-l-danger' },
+  purple: { iconBg: 'bg-purple-600', icon: 'text-white', accent: 'border-l-purple-600' },
+  indigo: { iconBg: 'bg-indigo-600', icon: 'text-white', accent: 'border-l-indigo-600' },
 };
 
 export function StatCard({ title, value, subtitle, icon: Icon, color = 'blue', trend }: StatCardProps) {
   const c = colors[color];
   return (
     <div className={cn(
-      'bg-white dark:bg-slate-900 rounded-2xl p-4 lg:p-5',
-      'border border-slate-200 dark:border-slate-800 border-l-4',
+      'rounded-2xl p-4 lg:p-5 border-l-4',
       'shadow-sm hover:shadow-md transition-all duration-200',
       c.accent
     )}>
@@ -34,7 +33,7 @@ export function StatCard({ title, value, subtitle, icon: Icon, color = 'blue', t
           <p className="text-xl lg:text-2xl font-extrabold text-slate-800 dark:text-white mt-1 leading-none truncate">{value}</p>
           {subtitle && <p className="text-[10px] lg:text-xs text-slate-400 mt-1 truncate">{subtitle}</p>}
           {trend && (
-            <p className={cn('text-xs mt-1.5 font-semibold flex items-center gap-1', trend.value >= 0 ? 'text-[#22C55E]' : 'text-red-500')}>
+            <p className={cn('text-xs mt-1.5 font-semibold flex items-center gap-1', trend.value >= 0 ? 'text-success' : 'text-danger')}>
               <span>{trend.value >= 0 ? '↑' : '↓'}</span>
               {Math.abs(trend.value)}% {trend.label}
             </p>

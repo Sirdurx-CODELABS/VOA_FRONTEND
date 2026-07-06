@@ -27,7 +27,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({ label, error, h
             'w-full rounded-xl border bg-white dark:bg-slate-900 text-slate-900 dark:text-white',
             'placeholder-slate-400 text-sm px-3.5 py-2.5 transition-all duration-150',
             'border-slate-300 dark:border-slate-700',
-            'focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/30 focus:border-[#1E3A8A] dark:focus:border-blue-400',
+            'focus:outline-none focus:ring-2 focus:ring-[var(--accent-ring)] focus:border-primary',
             'disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-50',
             icon && 'pl-10',
             error && 'border-red-400 focus:ring-red-200 focus:border-red-500',
@@ -63,7 +63,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(({ label, error
           'w-full rounded-xl border bg-white dark:bg-slate-900 text-slate-900 dark:text-white',
           'text-sm px-3.5 py-2.5 transition-all duration-150',
           'border-slate-300 dark:border-slate-700',
-          'focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/30 focus:border-[#1E3A8A] dark:focus:border-blue-400',
+          'focus:outline-none focus:ring-2 focus:ring-[var(--accent-ring)] focus:border-primary',
           error && 'border-red-400',
           className
         )}
@@ -96,7 +96,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(({ label,
           'w-full rounded-xl border bg-white dark:bg-slate-900 text-slate-900 dark:text-white',
           'placeholder-slate-400 text-sm px-3.5 py-2.5 transition-all duration-150 resize-none',
           'border-slate-300 dark:border-slate-700',
-          'focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/30 focus:border-[#1E3A8A] dark:focus:border-blue-400',
+          'focus:outline-none focus:ring-2 focus:ring-[var(--accent-ring)] focus:border-primary',
           error && 'border-red-400',
           className
         )}

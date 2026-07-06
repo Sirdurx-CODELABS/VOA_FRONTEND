@@ -239,7 +239,7 @@ export default function TargetsPage() {
         <div className="space-y-4">
           <Input label="Title" placeholder="e.g. Annual Gala Event Fund" value={form.title} onChange={e => set('title', e.target.value)} />
           <Textarea label="Description (optional)" placeholder="What is this fund for?" rows={2} value={form.description} onChange={e => set('description', e.target.value)} />
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Select label="Category" value={form.category} onChange={e => set('category', e.target.value)} options={CATEGORIES.map(c => ({ value: c.value, label: c.label }))} />
             <Input label="Target Amount (₦)" type="number" placeholder="100000" value={form.targetAmount} onChange={e => set('targetAmount', e.target.value)} />
           </div>

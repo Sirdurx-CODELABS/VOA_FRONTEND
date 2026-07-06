@@ -79,7 +79,7 @@ const ROLE_PERMISSIONS: Record<Role, string[]> = {
 
   vice_chairman: [
     'view_dashboard', 'view_all_users', 'view_programs', 'view_attendance',
-    'view_reports', 'view_announcements', 'manage_welfare', 'view_constitution',
+    'view_reports', 'view_announcements', 'view_constitution',
     'edit_own_profile', 'change_own_password', 'generate_own_id_card', 'view_analytics',
     'submit_contribution', 'view_contributions', 'view_accounts',
     'manage_announcements', 'post_executive_announcement', 'post_meeting_announcement',
@@ -149,6 +149,8 @@ export function getPermissions(role: Role, isVice = false): string[] {
   return perms.filter(p => {
     if (p === 'change_role_direct') return false;
     if (p.startsWith('approve_')) return false;
+    // Vice roles keep explicitly listed manage_* permissions
+    if (p === 'manage_organization') return true;
     if (p.startsWith('manage_')) return false;
     return true;
   });

@@ -11,6 +11,7 @@ interface AuthState {
   setAuth: (user: User, token: string, organization?: Organization | null) => void;
   logout: () => void;
   updateUser: (user: Partial<User>) => void;
+  updateOrganization: (org: Partial<Organization>) => void;
   setHydrated: () => void;
 }
 
@@ -35,6 +36,8 @@ export const useAuthStore = create<AuthState>()(
       },
       updateUser: (updates) =>
         set((state) => ({ user: state.user ? { ...state.user, ...updates } : null })),
+      updateOrganization: (updates) =>
+        set((state) => ({ organization: state.organization ? { ...state.organization, ...updates } : null })),
       setHydrated: () => set({ _hydrated: true }),
     }),
     {

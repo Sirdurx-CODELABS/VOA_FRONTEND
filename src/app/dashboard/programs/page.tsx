@@ -203,7 +203,7 @@ export default function ProgramsPage() {
       {/* Images */}
       <div className="space-y-2">
         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Images (Max 10)</label>
-        <div className="grid grid-cols-5 gap-2 mb-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mb-3">
           {/* Existing images */}
           {existingImages.map((img, i) => (
             <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
@@ -234,11 +234,11 @@ export default function ProgramsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Input label="Date" type="date" error={errors.date?.message} {...register('date', { required: 'Required' })} />
         <Input label="Venue" placeholder="Location" {...register('venue')} />
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Input label="Budget (₦)" type="number" placeholder="0" {...register('budget')} />
         <Select label="Status" options={[{ value: 'upcoming', label: 'Upcoming' }, { value: 'ongoing', label: 'Ongoing' }, { value: 'completed', label: 'Completed' }]} {...register('status')} />
       </div>
@@ -356,7 +356,7 @@ export default function ProgramsPage() {
           <div className="space-y-4">
             {/* Images */}
             {viewModal.images?.length > 0 && (
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {viewModal.images.map((img, i) => (
                   <img key={i} src={img} alt="" className="w-full aspect-square object-cover rounded-lg" />
                 ))}

@@ -140,7 +140,7 @@ export default function ContactPage() {
       <Modal open={!!viewModal} onClose={() => setViewModal(null)} title="Contact Message" size="xl">
         {viewModal && (
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-gray-500 mb-1">From</p>
                 <p className="text-gray-900 dark:text-white font-medium">{viewModal.name}</p>

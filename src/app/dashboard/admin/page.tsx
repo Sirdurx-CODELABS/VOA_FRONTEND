@@ -101,7 +101,7 @@ export default function SuperAdminPage() {
       </div>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
         {[
           { label: 'Active Members', value: activeUsers, icon: Users, color: 'text-[#22C55E]', bg: 'bg-green-50 dark:bg-green-900/20', border: 'border-l-[#22C55E]' },
           { label: 'Inactive', value: inactiveUsers, icon: Activity, color: 'text-[#F97316]', bg: 'bg-orange-50 dark:bg-orange-900/20', border: 'border-l-[#F97316]' },

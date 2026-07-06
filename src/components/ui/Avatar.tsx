@@ -17,7 +17,7 @@ const sizes = {
 
 export function Avatar({ name, src, size = 'md', className, superAdmin }: AvatarProps) {
   const sizeClass = sizes[size];
-  const bgClass = superAdmin ? 'bg-amber-500' : 'bg-[#F97316]';
+  const bgClass = superAdmin ? 'bg-amber-500' : 'bg-cta';
 
   if (src) {
     return (
