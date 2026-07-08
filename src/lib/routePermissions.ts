@@ -1,4 +1,4 @@
-import { SIDEBAR_CONFIG, SidebarItem } from '@/config/sidebarConfig';
+import { ORG_SIDEBAR_CONFIG, SidebarItem } from '@/config/orgSidebarConfig';
 import { Permission } from '@/lib/permissions';
 
 type RouteMap = Record<string, Permission | null>;
@@ -18,7 +18,7 @@ function buildRouteMap(): RouteMap {
       }
     }
   };
-  walk(SIDEBAR_CONFIG);
+  walk(ORG_SIDEBAR_CONFIG);
   return map;
 }
 

@@ -4,6 +4,9 @@ import {
   BookOpen, ShieldCheck, ClipboardList, GitBranch, Briefcase, Target,
   Activity, Image, PenTool, MapPin, FolderKanban, UsersRound, Mail, Printer,
   CheckSquare, Share2, Building2,
+  Stethoscope, Syringe, Pill, FlaskConical, HeartHandshake,
+  UserPlus, ClipboardPlus, Clock, HelpCircle, Ambulance,
+  UserCog, Hospital,
 } from 'lucide-react';
 import { Permission, PERMISSIONS } from '@/lib/permissions';
 
@@ -46,6 +49,80 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
     icon: Building2,
     permission: PERMISSIONS.MANAGE_ORGANIZATION,
     section: 'Main',
+  },
+
+  // ── CLINICAL ───────────────────────────────────────────────────────────────
+  {
+    id: 'clinical_dashboard',
+    label: 'Clinical',
+    href: '/dashboard/clinical',
+    icon: Stethoscope,
+    permission: PERMISSIONS.VIEW_CLINICAL_DASHBOARD,
+    section: 'Clinical',
+  },
+  {
+    id: 'triage_nurse',
+    label: 'Triage',
+    href: '/dashboard/clinical/triage',
+    icon: ClipboardPlus,
+    permission: PERMISSIONS.TRIAGE_PATIENT,
+    section: 'Clinical',
+  },
+  {
+    id: 'pharmacy',
+    label: 'Pharmacy',
+    href: '/dashboard/clinical/pharmacy',
+    icon: Pill,
+    permission: PERMISSIONS.DISPENSE_MEDICATION,
+    section: 'Clinical',
+  },
+  {
+    id: 'laboratory',
+    label: 'Laboratory',
+    href: '/dashboard/clinical/laboratory',
+    icon: FlaskConical,
+    permission: PERMISSIONS.PROCESS_SAMPLE,
+    section: 'Clinical',
+  },
+  {
+    id: 'adherence',
+    label: 'Adherence',
+    href: '/dashboard/clinical/adherence',
+    icon: HeartHandshake,
+    permission: PERMISSIONS.CONDUCT_COUNSELING,
+    section: 'Clinical',
+  },
+  {
+    id: 'case_mgmt',
+    label: 'Case Management',
+    href: '/dashboard/clinical/case',
+    icon: UserPlus,
+    permission: PERMISSIONS.MANAGE_CASE,
+    section: 'Clinical',
+  },
+  {
+    id: 'clinical_appointments',
+    label: 'Appointments',
+    href: '/dashboard/clinical/appointments',
+    icon: Clock,
+    permission: PERMISSIONS.MANAGE_APPOINTMENTS,
+    section: 'Clinical',
+  },
+  {
+    id: 'clinical_patients',
+    label: 'Patients',
+    href: '/dashboard/clinical/patients',
+    icon: UserCog,
+    permission: PERMISSIONS.VIEW_PATIENT,
+    section: 'Clinical',
+  },
+  {
+    id: 'patient_timeline',
+    label: 'Patient Timeline',
+    href: '/dashboard/clinical/timeline',
+    icon: Activity,
+    permission: PERMISSIONS.VIEW_PATIENT_TIMELINE,
+    section: 'Clinical',
   },
 
   // ── PEOPLE ────────────────────────────────────────────────────────────────
@@ -223,6 +300,21 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
       { label: 'Overview',          href: '/dashboard/analytics',                  permission: PERMISSIONS.VIEW_ANALYTICS },
       { label: 'Leaderboard',       href: '/dashboard/analytics?view=leaderboard', permission: PERMISSIONS.VIEW_ANALYTICS },
       { label: 'Inactive Members',  href: '/dashboard/analytics?view=inactive',    permission: PERMISSIONS.VIEW_ANALYTICS },
+    ],
+  },
+
+  // ── HOSPITAL ADMIN ─────────────────────────────────────────────────────────
+  {
+    id: 'hospital_admin',
+    label: 'Hospital',
+    icon: Hospital,
+    section: 'Administration',
+    children: [
+      { label: 'Staff',           href: '/dashboard/hospital/staff',        permission: PERMISSIONS.MANAGE_STAFF },
+      { label: 'Departments',     href: '/dashboard/hospital/departments',  permission: PERMISSIONS.MANAGE_DEPARTMENTS },
+      { label: 'Reports',         href: '/dashboard/hospital/reports',      permission: PERMISSIONS.VIEW_REPORTS },
+      { label: 'AI Configuration',href: '/dashboard/hospital/ai',           permission: PERMISSIONS.MANAGE_AI },
+      { label: 'Settings',        href: '/dashboard/hospital/settings',     permission: PERMISSIONS.MANAGE_HOSPITAL },
     ],
   },
 

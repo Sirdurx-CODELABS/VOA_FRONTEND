@@ -5,15 +5,16 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { useUIStore } from '@/store/uiStore';
 import { cn, getInitials } from '@/lib/utils';
-import { hasPermission, PERMISSIONS } from '@/lib/permissions';
+import { hasPermission, PERMISSIONS, isHmsRole, getDashboardRoute } from '@/lib/permissions';
 import { VOALogo } from '@/components/ui/VOALogo';
 import { Avatar } from '@/components/ui/Avatar';
-import { SIDEBAR_CONFIG, SidebarItem, SidebarChild } from '@/config/sidebarConfig';
+import { ORG_SIDEBAR_CONFIG, SidebarItem, SidebarChild } from '@/config/orgSidebarConfig';
+import { HMS_SIDEBAR_CONFIG } from '@/config/hmsSidebarConfig';
 import { notificationService, documentApprovalService } from '@/services/api.service';
 import { User } from '@/types';
 import toast from 'react-hot-toast';
 import {
-  ChevronLeft, ChevronRight, LogOut, Settings, Building2,
+  ChevronLeft, ChevronRight, LogOut, Settings, Building2, Stethoscope,
 } from 'lucide-react';
 
 /* ── Badge pill ──────────────────────────────────────────────────────────── */
@@ -209,8 +210,11 @@ const NavGroup = memo(function NavGroup({
 export const Sidebar = memo(function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, organization, logout } = useAuthStore();
+  const { user, organization, portal, logout } = useAuthStore();
   const { sidebarOpen, toggleSidebar, badgeCounts, setBadgeCounts } = useUIStore();
+
+  const isHms = portal === 'hms' || (user ? isHmsRole(user.role) : false);
+  const SIDEBAR_CONFIG = isHms ? HMS_SIDEBAR_CONFIG : ORG_SIDEBAR_CONFIG;
 
   // Fetch badge counts periodically
   const fetchBadges = useCallback(async () => {
@@ -239,9 +243,9 @@ export const Sidebar = memo(function Sidebar() {
 
   const handleLogout = useCallback(() => {
     logout();
-    toast.success('See you soon! 👋');
-    router.push('/login');
-  }, [logout, router]);
+    toast.success(isHms ? 'Signed out of HMS' : 'See you soon!');
+    router.push(isHms ? '/hms/login' : '/login');
+  }, [logout, router, isHms]);
 
   // Determine visibility
   const isVisible = useCallback((item: SidebarItem): boolean => {
@@ -303,13 +307,23 @@ export const Sidebar = memo(function Sidebar() {
           sidebarOpen ? 'justify-between' : 'justify-center',
         )}>
           {sidebarOpen && (
-            organization?.logoUrl ? (
+            isHms ? (
+              <div className="flex items-center gap-2.5 select-none">
+                <div className="w-[44px] h-[44px] rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                  <Stethoscope className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex flex-col leading-none">
+                  <span className="text-white font-extrabold text-base tracking-tight">VOA HMS</span>
+                  <span className="text-cta font-medium text-[10px] tracking-widest uppercase">Hospital Management</span>
+                </div>
+              </div>
+            ) : organization?.logoUrl ? (
               <div className="flex items-center gap-2.5 select-none">
                 <img src={organization.logoUrl} alt={organization.organizationName}
                   className="w-[44px] h-[44px] object-contain rounded-xl" />
                 <div className="flex flex-col leading-none">
                   <span className="text-white font-extrabold text-base tracking-tight">{organization.shortName || 'VOA'}</span>
-                  <span className="text-cta font-medium text-[10px] tracking-widest uppercase">Management</span>
+                  <span className="text-cta font-medium text-[10px] tracking-widest uppercase">Organisation</span>
                 </div>
               </div>
             ) : <VOALogo onDark size={44} />
@@ -360,15 +374,20 @@ export const Sidebar = memo(function Sidebar() {
                   );
                 }
 
-                const active = pathname === item.href ||
-                  (item.href !== '/dashboard' &&
-                   !item.href?.startsWith('/constitution') &&
-                   !!item.href && pathname.startsWith(item.href));
+                // HMS users: dashboard link goes to role-specific dashboard
+                const itemHref = (isHms && item.id === 'dashboard' && user)
+                  ? getDashboardRoute(user)
+                  : item.href;
+
+                const active = pathname === itemHref ||
+                  (itemHref !== '/dashboard' &&
+                   !itemHref?.startsWith('/constitution') &&
+                   !!itemHref && pathname.startsWith(itemHref));
 
                 return (
                   <NavLink
                     key={item.id}
-                    item={item}
+                    item={{ ...item, href: itemHref }}
                     active={active}
                     sidebarOpen={sidebarOpen}
                     badge={badge}

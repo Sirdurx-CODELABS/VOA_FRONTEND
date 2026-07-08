@@ -1,17 +1,33 @@
 'use client';
 import { useState, useEffect, useRef, useCallback, memo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { useUIStore } from '@/store/uiStore';
+import { useNotificationStore } from '@/store/notificationStore';
+import { connectSocket } from '@/services/socket.service';
 import { notificationService } from '@/services/api.service';
 import { Notification } from '@/types';
-import { Menu, Bell, Sun, Moon, Monitor, LogOut, Settings, ChevronDown, Calendar, MessageSquare, Heart, Trophy, Info } from 'lucide-react';
+import { Menu, Bell, Sun, Moon, Monitor, LogOut, Settings, ChevronDown, Calendar, MessageSquare, Heart, Trophy, Info, Stethoscope, Pill, FlaskConical, HeartHandshake, ClipboardPlus, AlertTriangle } from 'lucide-react';
 import { formatDateTime, getInitials, cn } from '@/lib/utils';
 import { Avatar } from '@/components/ui/Avatar';
 import toast from 'react-hot-toast';
 
+const CLINICAL_ROLES = ['doctor', 'nurse', 'pharmacist', 'lab_scientist', 'adherence_counselor', 'case_manager', 'hospital_admin'];
+
 /* Notification type → icon + style */
 const notifMeta = (type: string) => {
+  const clinicalIcons: Record<string, { icon: any; cls: string; label: string }> = {
+    triage_emergency:   { icon: AlertTriangle, cls: 'notif-critical',  label: 'Emergency' },
+    triage_urgent:      { icon: Stethoscope,   cls: 'notif-critical',  label: 'Triage' },
+    lab_critical_flagged: { icon: FlaskConical, cls: 'notif-critical', label: 'Lab Critical' },
+    lab_result_uploaded:  { icon: FlaskConical, cls: 'notif-program',  label: 'Lab Result' },
+    prescription_ready:   { icon: Pill,         cls: 'notif-welfare',  label: 'Prescription' },
+    prescription_dispensed: { icon: Pill,       cls: 'notif-program',  label: 'Dispensed' },
+    counseling_session_scheduled: { icon: HeartHandshake, cls: 'notif-welfare', label: 'Counseling' },
+    case_assigned:        { icon: ClipboardPlus, cls: 'notif-critical', label: 'Case' },
+    appointment_reminder: { icon: Calendar,      cls: 'notif-program',  label: 'Appointment' },
+  };
+  if (clinicalIcons[type]) return clinicalIcons[type];
   switch (type) {
     case 'event_reminder': return { icon: Calendar,      cls: 'notif-program',     label: 'Program' };
     case 'welfare':        return { icon: Heart,         cls: 'notif-welfare',     label: 'Welfare' };
@@ -23,6 +39,8 @@ const notifMeta = (type: string) => {
 
 export const Navbar = memo(function Navbar() {
   const router = useRouter();
+  const pathname = usePathname?.() || '';
+  const isDoctorRoute = pathname.startsWith('/dashboard/doctor');
   const { user, organization, logout } = useAuthStore();
   const { toggleSidebar, theme, setTheme } = useUIStore();
   const [notifOpen, setNotifOpen] = useState(false);
@@ -31,8 +49,21 @@ export const Navbar = memo(function Navbar() {
   const [unread, setUnread] = useState(0);
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+  const clinNotifRef = useRef<HTMLDivElement>(null);
+
+  const isClinicalRole = user?.role && CLINICAL_ROLES.includes(user.role);
+  const clinNotifs = useNotificationStore((s) => s.notifications);
+  const clinUnread = useNotificationStore((s) => s.unreadCount);
+  const clinFetch = useNotificationStore((s) => s.fetch);
+  const clinFetchUnread = useNotificationStore((s) => s.fetchUnreadCount);
+  const clinMarkRead = useNotificationStore((s) => s.markRead);
+  const clinMarkAllRead = useNotificationStore((s) => s.markAllRead);
+  const clinInitSocket = useNotificationStore((s) => s.initSocketListener);
+  const clinDestroySocket = useNotificationStore((s) => s.destroySocketListener);
+  const [clinNotifOpen, setClinNotifOpen] = useState(false);
 
   const fetchNotifs = useCallback(async () => {
+    if (isDoctorRoute) return;
     try {
       const [notifRes, countRes] = await Promise.all([
         notificationService.getAll({ limit: 8 }),
@@ -50,8 +81,29 @@ export const Navbar = memo(function Navbar() {
   }, [fetchNotifs]);
 
   useEffect(() => {
+    if (isClinicalRole && user?._id) {
+      const token = localStorage.getItem('token');
+      if (token) {
+        connectSocket(token);
+        clinInitSocket();
+      }
+    }
+    return () => {
+      if (isClinicalRole) clinDestroySocket();
+    };
+  }, [isClinicalRole, user?._id, clinInitSocket, clinDestroySocket]);
+
+  useEffect(() => {
+    if (isClinicalRole) {
+      clinFetch();
+      clinFetchUnread();
+    }
+  }, [isClinicalRole, clinFetch, clinFetchUnread]);
+
+  useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false);
+      if (clinNotifRef.current && !clinNotifRef.current.contains(e.target as Node)) setClinNotifOpen(false);
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) setProfileOpen(false);
     };
     document.addEventListener('mousedown', handler);
@@ -163,6 +215,83 @@ export const Navbar = memo(function Navbar() {
             </div>
           )}
         </div>
+
+        {/* Clinical Notifications */}
+        {isClinicalRole && (
+          <div className="relative" ref={clinNotifRef}>
+            <button onClick={() => { setClinNotifOpen(!clinNotifOpen); setNotifOpen(false); setProfileOpen(false); }}
+              className="relative p-2 rounded-xl hover:bg-hover text-secondary transition-colors"
+              title="Clinical notifications">
+              <Bell className={cn('w-4 h-4 transition-transform', clinNotifOpen && 'animate-bounce-in')} />
+              {clinUnread > 0 && (
+                <span className="absolute top-1 right-1 min-w-[16px] h-4 bg-emerald-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center px-0.5 animate-bounce-in">
+                  {clinUnread > 9 ? '9+' : clinUnread}
+                </span>
+              )}
+            </button>
+
+            {clinNotifOpen && (
+              <div className="absolute right-0 top-12 notif-dropdown bg-card-bg rounded-2xl shadow-2xl border border-default z-50 animate-slide-down overflow-hidden" style={{ width: 360 }}>
+                {/* Header */}
+                <div className="flex items-center justify-between px-4 py-3 border-b border-default bg-gradient-to-r from-emerald-50 dark:from-emerald-900/20 to-transparent">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center">
+                      <Stethoscope className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <span className="text-sm font-bold text-slate-800 dark:text-white">Clinical</span>
+                    {clinUnread > 0 && <span className="bg-emerald-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{clinUnread} new</span>}
+                  </div>
+                  {clinUnread > 0 && (
+                    <button onClick={clinMarkAllRead} className="text-xs text-primary font-semibold hover:underline">
+                      Mark all read
+                    </button>
+                  )}
+                </div>
+
+                {/* List */}
+                <div className="max-h-80 overflow-y-auto divide-y divide-border">
+                  {clinNotifs.length === 0 ? (
+                    <div className="py-12 text-center">
+                      <div className="w-12 h-12 bg-hover rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Stethoscope className="w-5 h-5 text-muted" />
+                      </div>
+                      <p className="text-sm font-medium text-secondary">All clear</p>
+                      <p className="text-xs text-muted mt-0.5">No clinical notifications</p>
+                    </div>
+                  ) : clinNotifs.map((n) => {
+                    const meta = notifMeta(n.type);
+                    const Icon = meta.icon;
+                    return (
+                      <div key={n._id} onClick={() => clinMarkRead(n._id)}
+                        className={cn('flex items-start gap-3 px-4 py-3 hover:bg-hover transition-colors cursor-pointer', !n.read && 'bg-emerald-50 dark:bg-emerald-900/10')}>
+                        <div className={cn('w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5', !n.read ? meta.cls + ' ring-2 ring-emerald-200 dark:ring-emerald-800' : meta.cls)}>
+                          <Icon className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className={cn('text-sm font-semibold leading-tight', !n.read ? 'text-slate-800 dark:text-white' : 'text-slate-600 dark:text-slate-400')}>{n.title}</p>
+                            {!n.read && <span className="w-2 h-2 bg-emerald-500 rounded-full shrink-0 mt-1" />}
+                          </div>
+                          <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{n.message}</p>
+                          {n.patientName && <p className="text-[10px] text-primary font-medium mt-0.5">Patient: {n.patientName}</p>}
+                          <p className="text-[10px] text-slate-400 mt-1">{formatDateTime(n.createdAt)}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Footer */}
+                <div className="px-4 py-2.5 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
+                  <button onClick={() => { router.push('/dashboard/clinical'); setClinNotifOpen(false); }}
+                    className="text-xs font-bold text-primary hover:underline w-full text-center">
+                    View clinical dashboard →
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Profile */}
         <div className="relative ml-1" ref={profileRef}>

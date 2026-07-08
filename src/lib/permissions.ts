@@ -59,6 +59,57 @@ export const PERMISSIONS = {
   MANAGE_CONTACT:               'manage_contact',
   VIEW_CONTACT:                 'view_contact',
   MANAGE_ORGANIZATION:          'manage_organization',
+  // Healthcare / Clinical permissions
+  MANAGE_PATIENTS:              'manage_patients',
+  VIEW_PATIENT:                 'view_patient',
+  EDIT_PATIENT:                 'edit_patient',
+  REGISTER_PATIENT:             'register_patient',
+  TRIAGE_PATIENT:               'triage_patient',
+  RECORD_VITALS:                'record_vitals',
+  VIEW_VITALS:                  'view_vitals',
+  MANAGE_CONSULTATIONS:         'manage_consultations',
+  APPROVE_CONSULTATION:         'approve_consultation',
+  CONDUCT_CONSULTATION:         'conduct_consultation',
+  VIEW_CONSULTATIONS:           'view_consultations',
+  CREATE_PRESCRIPTION:          'create_prescription',
+  REVIEW_PRESCRIPTION:          'review_prescription',
+  DISPENSE_MEDICATION:          'dispense_medication',
+  VERIFY_PRESCRIPTION:          'verify_prescription',
+  VIEW_PRESCRIPTIONS:           'view_prescriptions',
+  REQUEST_LAB:                  'request_lab',
+  PROCESS_SAMPLE:               'process_sample',
+  UPLOAD_LAB_RESULTS:           'upload_lab_results',
+  VIEW_LAB_RESULTS:             'view_lab_results',
+  FLAG_CRITICAL_RESULT:         'flag_critical_result',
+  MANAGE_ADHERENCE:             'manage_adherence',
+  CONDUCT_COUNSELING:           'conduct_counseling',
+  VIEW_ADHERENCE:               'view_adherence',
+  MANAGE_CASE:                  'manage_case',
+  MANAGE_REFERRALS:             'manage_referrals',
+  CONDUCT_OUTREACH:             'conduct_outreach',
+  MANAGE_APPOINTMENTS:          'manage_appointments',
+  MANAGE_SCHEDULE:              'manage_schedule',
+  MANAGE_HOSPITAL:              'manage_hospital',
+  MANAGE_STAFF:                 'manage_staff',
+  MANAGE_DEPARTMENTS:           'manage_departments',
+  MANAGE_AI:                    'manage_ai',
+  MANAGE_PROMPTS:               'manage_prompts',
+  MANAGE_KNOWLEDGE:             'manage_knowledge',
+  VIEW_AI_ANALYTICS:            'view_ai_analytics',
+  VIEW_CLINICAL_DASHBOARD:      'view_clinical_dashboard',
+  VIEW_NURSE_DASHBOARD:         'view_nurse_dashboard',
+  VIEW_PHARMACY_DASHBOARD:      'view_pharmacy_dashboard',
+  VIEW_LAB_DASHBOARD:           'view_lab_dashboard',
+  VIEW_COUNSELOR_DASHBOARD:     'view_counselor_dashboard',
+  VIEW_CASE_DASHBOARD:          'view_case_dashboard',
+  VIEW_HOSPITAL_ADMIN_DASHBOARD:'view_hospital_admin_dashboard',
+  VIEW_PATIENT_TIMELINE:        'view_patient_timeline',
+  VIEW_CARE_TEAM:               'view_care_team',
+  UPLOAD_DOCUMENT:              'upload_document',
+  VIEW_DOCUMENT:                'view_document',
+  MANAGE_MEDICATION_ADMIN:      'manage_medication_administration',
+  VIEW_STOCK:                   'view_stock',
+  MANAGE_STOCK:                 'manage_stock',
 } as const;
 
 export type Permission = typeof PERMISSIONS[keyof typeof PERMISSIONS];
@@ -136,6 +187,236 @@ const ROLE_PERMISSIONS: Record<Role, string[]> = {
     'edit_own_profile', 'change_own_password', 'generate_own_id_card',
     'submit_contribution', 'view_contributions', 'view_accounts',
   ],
+
+  // ─── Healthcare / Clinical Roles ───────────────────────────────────
+  voa_admin: ['*'],
+
+  hospital_admin: [
+    'view_clinical_dashboard', 'view_hospital_admin_dashboard',
+    'view_dashboard', 'view_all_users', 'manage_users',
+    'manage_staff', 'manage_departments', 'manage_hospital',
+    'view_patient', 'register_patient',
+    'view_patient_timeline', 'view_care_team',
+    'view_reports', 'create_reports', 'manage_settings',
+    'manage_ai', 'manage_prompts', 'manage_knowledge', 'view_ai_analytics',
+    'view_analytics', 'view_system_logs',
+    'edit_own_profile', 'change_own_password',
+    'manage_announcements', 'view_announcements',
+    'manage_organization',
+  ],
+
+  doctor: [
+    'view_clinical_dashboard', 'view_dashboard',
+    'manage_patients', 'view_patient', 'edit_patient', 'register_patient',
+    'manage_consultations', 'conduct_consultation', 'view_consultations', 'approve_consultation',
+    'create_prescription', 'view_prescriptions',
+    'request_lab', 'view_lab_results',
+    'manage_referrals',
+    'triage_patient', 'view_vitals',
+    'view_patient_timeline', 'view_care_team',
+    'manage_appointments', 'manage_schedule',
+    'manage_adherence', 'view_adherence',
+    'manage_case',
+    'view_ai_analytics',
+    'view_document', 'upload_document',
+    'edit_own_profile', 'change_own_password',
+    'view_announcements', 'view_analytics',
+  ],
+
+  nurse: [
+    'view_nurse_dashboard', 'view_dashboard',
+    'view_patient', 'edit_patient', 'register_patient',
+    'triage_patient', 'record_vitals', 'view_vitals',
+    'manage_appointments',
+    'manage_medication_administration',
+    'view_prescriptions',
+    'view_lab_results',
+    'view_patient_timeline',
+    'manage_adherence',
+    'view_document', 'upload_document',
+    'edit_own_profile', 'change_own_password',
+    'view_announcements',
+  ],
+
+  pharmacist: [
+    'view_pharmacy_dashboard', 'view_dashboard',
+    'view_patient', 'view_prescriptions',
+    'review_prescription', 'verify_prescription',
+    'dispense_medication',
+    'manage_adherence',
+    'view_lab_results',
+    'view_stock', 'manage_stock',
+    'view_patient_timeline',
+    'view_document', 'upload_document',
+    'edit_own_profile', 'change_own_password',
+    'view_announcements',
+  ],
+
+  lab_scientist: [
+    'view_lab_dashboard', 'view_dashboard',
+    'view_patient',
+    'process_sample', 'upload_lab_results', 'view_lab_results',
+    'flag_critical_result',
+    'view_patient_timeline',
+    'view_document', 'upload_document',
+    'edit_own_profile', 'change_own_password',
+    'view_announcements',
+  ],
+
+  adherence_counselor: [
+    'view_counselor_dashboard', 'view_dashboard',
+    'view_patient', 'edit_patient',
+    'manage_adherence', 'conduct_counseling', 'view_adherence',
+    'manage_appointments',
+    'view_lab_results',
+    'view_patient_timeline',
+    'view_document', 'upload_document',
+    'edit_own_profile', 'change_own_password',
+    'view_announcements',
+  ],
+
+  case_manager: [
+    'view_case_dashboard', 'view_dashboard',
+    'view_patient', 'edit_patient',
+    'manage_case', 'manage_referrals', 'conduct_outreach',
+    'manage_appointments',
+    'view_adherence',
+    'view_lab_results',
+    'view_patient_timeline',
+    'view_document', 'upload_document',
+    'edit_own_profile', 'change_own_password',
+    'view_announcements',
+  ],
+
+  receptionist: [
+    'view_dashboard',
+    'view_patient', 'register_patient', 'edit_patient',
+    'manage_appointments',
+    'view_patient_timeline',
+    'view_document', 'upload_document',
+    'edit_own_profile', 'change_own_password',
+    'view_announcements',
+  ],
+
+  data_officer: [
+    'view_dashboard',
+    'view_patient', 'edit_patient', 'register_patient',
+    'view_lab_results', 'upload_lab_results',
+    'view_adherence',
+    'view_patient_timeline',
+    'view_document', 'upload_document',
+    'edit_own_profile', 'change_own_password',
+    'view_announcements',
+  ],
+
+  medical_records_officer: [
+    'view_dashboard',
+    'view_patient', 'edit_patient', 'register_patient',
+    'view_patient_timeline',
+    'view_document', 'upload_document',
+    'edit_own_profile', 'change_own_password',
+    'view_announcements',
+  ],
+
+  radiographer: [
+    'view_lab_dashboard', 'view_dashboard',
+    'view_patient',
+    'process_sample', 'upload_lab_results', 'view_lab_results',
+    'flag_critical_result',
+    'view_patient_timeline',
+    'view_document', 'upload_document',
+    'edit_own_profile', 'change_own_password',
+    'view_announcements',
+  ],
+
+  nutritionist: [
+    'view_counselor_dashboard', 'view_dashboard',
+    'view_patient', 'edit_patient',
+    'manage_adherence', 'conduct_counseling', 'view_adherence',
+    'view_lab_results',
+    'view_patient_timeline',
+    'view_document', 'upload_document',
+    'edit_own_profile', 'change_own_password',
+    'view_announcements',
+  ],
+
+  counselor: [
+    'view_counselor_dashboard', 'view_dashboard',
+    'view_patient', 'edit_patient',
+    'manage_adherence', 'conduct_counseling', 'view_adherence',
+    'view_lab_results',
+    'view_patient_timeline',
+    'view_document', 'upload_document',
+    'edit_own_profile', 'change_own_password',
+    'view_announcements',
+  ],
+
+  alliance_admin: [
+    'view_dashboard', 'view_all_users', 'manage_users',
+    'manage_organization', 'manage_settings',
+    'view_programs', 'manage_programs',
+    'view_reports', 'create_reports', 'view_analytics',
+    'manage_announcements', 'view_announcements',
+    'edit_own_profile', 'change_own_password',
+    'view_constitution',
+  ],
+
+  org_admin: [
+    'view_dashboard', 'view_all_users', 'manage_users',
+    'manage_organization', 'manage_settings',
+    'view_programs', 'view_reports', 'view_analytics',
+    'manage_announcements', 'view_announcements',
+    'edit_own_profile', 'change_own_password',
+  ],
+
+  programme_manager: [
+    'view_dashboard',
+    'manage_programs', 'view_programs',
+    'manage_attendance', 'view_attendance',
+    'create_reports', 'view_reports',
+    'view_analytics',
+    'view_announcements',
+    'edit_own_profile', 'change_own_password',
+  ],
+
+  programme_officer: [
+    'view_dashboard',
+    'manage_programs', 'view_programs',
+    'manage_attendance', 'view_attendance',
+    'view_reports',
+    'view_announcements',
+    'edit_own_profile', 'change_own_password',
+  ],
+
+  finance_officer: [
+    'view_dashboard',
+    'view_finance', 'view_accounts',
+    'view_contributions', 'view_reports',
+    'view_announcements',
+    'edit_own_profile', 'change_own_password',
+  ],
+
+  mande_officer: [
+    'view_dashboard',
+    'view_reports', 'create_reports', 'view_analytics',
+    'view_programs', 'view_attendance',
+    'view_announcements',
+    'edit_own_profile', 'change_own_password',
+  ],
+
+  support_group_leader: [
+    'view_dashboard',
+    'view_programs', 'manage_attendance', 'view_attendance',
+    'view_announcements',
+    'edit_own_profile', 'change_own_password',
+  ],
+
+  volunteer: [
+    'view_dashboard',
+    'view_programs', 'view_attendance',
+    'view_announcements',
+    'edit_own_profile', 'change_own_password',
+  ],
 };
 
 /**
@@ -149,7 +430,6 @@ export function getPermissions(role: Role, isVice = false): string[] {
   return perms.filter(p => {
     if (p === 'change_role_direct') return false;
     if (p.startsWith('approve_')) return false;
-    // Vice roles keep explicitly listed manage_* permissions
     if (p === 'manage_organization') return true;
     if (p.startsWith('manage_')) return false;
     return true;
@@ -162,8 +442,7 @@ export function getPermissions(role: Role, isVice = false): string[] {
  */
 export function hasPermission(user: User | null, permission: Permission): boolean {
   if (!user) return false;
-  if (user.role === 'super_admin') return true;
-  // Use server-provided permissions if available
+  if (user.role === 'super_admin' || user.role === 'voa_admin') return true;
   if (user.permissions?.length) {
     if (user.permissions.includes('*')) return true;
     return user.permissions.includes(permission);
@@ -176,12 +455,54 @@ export function hasPermission(user: User | null, permission: Permission): boolea
 /** Alias for hasPermission */
 export const can = hasPermission;
 
+export const CLINICAL_ROLES: Role[] = [
+  'doctor', 'nurse', 'pharmacist', 'lab_scientist',
+  'adherence_counselor', 'case_manager', 'receptionist', 'data_officer',
+];
+
+export const HMS_ROLES: Role[] = [
+  'hospital_admin', 'doctor', 'nurse', 'pharmacist', 'lab_scientist',
+  'adherence_counselor', 'case_manager', 'receptionist', 'data_officer',
+  'medical_records_officer', 'radiographer', 'nutritionist', 'counselor',
+];
+
+export const ORG_ROLES: Role[] = [
+  'super_admin', 'voa_admin',
+  'chairman', 'vice_chairman', 'secretary', 'treasurer', 'pro',
+  'program_coordinator', 'membership_coordinator', 'welfare_officer', 'member',
+  'alliance_admin', 'org_admin', 'programme_manager', 'programme_officer',
+  'finance_officer', 'data_officer', 'mande_officer',
+  'support_group_leader', 'volunteer',
+];
+
+export function isClinicalRole(role: Role): boolean {
+  return CLINICAL_ROLES.includes(role);
+}
+
+export function isHmsRole(role: Role): boolean {
+  return HMS_ROLES.includes(role);
+}
+
+export function isOrgRole(role: Role): boolean {
+  return ORG_ROLES.includes(role);
+}
+
+export function getPortalForRole(role: Role): 'hms' | 'org' | null {
+  if (isHmsRole(role)) return 'hms';
+  if (isOrgRole(role)) return 'org';
+  return null;
+}
+
 /**
  * Check if a role can assign another role.
  */
 export function canAssignRole(assignerRole: Role, targetRole: Role): boolean {
   if (assignerRole === 'super_admin') return true;
-  if (assignerRole === 'chairman') return targetRole !== 'super_admin';
+  if (assignerRole === 'voa_admin') return true;
+  if (assignerRole === 'hospital_admin') {
+    return targetRole === 'hospital_admin' || CLINICAL_ROLES.includes(targetRole);
+  }
+  if (assignerRole === 'chairman') return targetRole !== 'super_admin' && !isClinicalRole(targetRole);
   if (assignerRole === 'membership_coordinator') {
     return ['member', 'welfare_officer', 'pro', 'program_coordinator', 'secretary', 'treasurer'].includes(targetRole);
   }
@@ -191,8 +512,31 @@ export function canAssignRole(assignerRole: Role, targetRole: Role): boolean {
 // Roles assignable by each role
 export const ASSIGNABLE_ROLES: Record<string, Role[]> = {
   super_admin: [
-    'super_admin', 'chairman', 'vice_chairman', 'secretary', 'treasurer', 'pro',
+    'super_admin', 'voa_admin', 'hospital_admin',
+    'doctor', 'nurse', 'pharmacist', 'lab_scientist',
+    'adherence_counselor', 'case_manager', 'receptionist', 'data_officer',
+    'chairman', 'vice_chairman', 'secretary', 'treasurer', 'pro',
     'program_coordinator', 'membership_coordinator', 'welfare_officer', 'member',
+  ],
+  voa_admin: [
+    'voa_admin', 'hospital_admin',
+    'doctor', 'nurse', 'pharmacist', 'lab_scientist',
+    'adherence_counselor', 'case_manager', 'receptionist', 'data_officer',
+    'chairman', 'vice_chairman', 'secretary', 'treasurer', 'pro',
+    'program_coordinator', 'membership_coordinator', 'welfare_officer', 'member',
+  ],
+  hospital_admin: [
+    'hospital_admin', 'doctor', 'nurse', 'pharmacist', 'lab_scientist',
+    'adherence_counselor', 'case_manager', 'receptionist', 'data_officer',
+    'medical_records_officer', 'radiographer', 'nutritionist', 'counselor',
+  ],
+  alliance_admin: [
+    'alliance_admin', 'org_admin', 'programme_manager', 'programme_officer',
+    'finance_officer', 'mande_officer', 'support_group_leader', 'volunteer', 'member',
+  ],
+  org_admin: [
+    'programme_manager', 'programme_officer', 'finance_officer', 'mande_officer',
+    'support_group_leader', 'volunteer', 'member',
   ],
   chairman: [
     'vice_chairman', 'secretary', 'treasurer', 'pro',
@@ -201,7 +545,44 @@ export const ASSIGNABLE_ROLES: Record<string, Role[]> = {
   membership_coordinator: ['member', 'welfare_officer', 'pro', 'program_coordinator', 'secretary', 'treasurer'],
 };
 
+/**
+ * Role → Dashboard route mapping for HMS portal
+ */
+export const HMS_DASHBOARD_ROUTES: Record<string, string> = {
+  doctor: '/dashboard/doctor',
+  nurse: '/dashboard/nurse',
+  pharmacist: '/dashboard/pharmacist',
+  lab_scientist: '/dashboard/lab',
+  adherence_counselor: '/dashboard/counselor',
+  counselor: '/dashboard/counselor',
+  case_manager: '/dashboard/case-manager',
+  receptionist: '/dashboard/hms/reception',
+  hospital_admin: '/dashboard/hospital-admin',
+  data_officer: '/dashboard/hms/data',
+  medical_records_officer: '/dashboard/hms/medical-records',
+  radiographer: '/dashboard/hms/radiographer',
+  nutritionist: '/dashboard/hms/nutritionist',
+};
+
+/**
+ * Get the correct dashboard route for a user.
+ */
+export function getDashboardRoute(user: User | null): string {
+  if (!user) return '/login';
+  const role = user.role;
+  if (role === 'super_admin' || role === 'voa_admin') return '/dashboard/admin';
+  if (HMS_DASHBOARD_ROUTES[role]) return HMS_DASHBOARD_ROUTES[role];
+  return '/dashboard';
+}
+
 export const ALL_ROLES: Role[] = [
-  'super_admin', 'chairman', 'vice_chairman', 'secretary', 'treasurer', 'pro',
+  'super_admin', 'voa_admin', 'hospital_admin',
+  'doctor', 'nurse', 'pharmacist', 'lab_scientist',
+  'adherence_counselor', 'case_manager', 'receptionist', 'data_officer',
+  'medical_records_officer', 'radiographer', 'nutritionist', 'counselor',
+  'chairman', 'vice_chairman', 'secretary', 'treasurer', 'pro',
   'program_coordinator', 'membership_coordinator', 'welfare_officer', 'member',
+  'alliance_admin', 'org_admin', 'programme_manager', 'programme_officer',
+  'finance_officer', 'data_officer', 'mande_officer',
+  'support_group_leader', 'volunteer',
 ];

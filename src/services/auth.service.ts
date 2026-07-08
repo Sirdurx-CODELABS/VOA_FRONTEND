@@ -1,16 +1,16 @@
 import api from '@/lib/axios';
 
 export const authService = {
-  login: (data: { email: string; password: string }) => api.post('/auth/login', data),
-  register: (data: { 
-    fullName: string; 
-    email: string; 
-    password: string; 
-    phone?: string; 
-    gender?: string; 
-    dob?: string; 
-    address?: string; 
-    interests?: string[]; 
+  login: (data: { identifier?: string; email?: string; password: string; portal?: string }) => api.post('/auth/login', data),
+  register: (data: {
+    fullName: string;
+    email: string;
+    password: string;
+    phone?: string;
+    gender?: string;
+    dob?: string;
+    address?: string;
+    interests?: string[];
     children?: { childName: string; childDob: string; childGender?: string; relationship?: string }[];
     allianceOrganizationId?: string;
     requestNewOrganization?: string;

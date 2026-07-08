@@ -4,12 +4,15 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { cn } from '@/lib/utils';
-import { hasPermission } from '@/lib/permissions';
-import { SIDEBAR_CONFIG, SidebarItem, SidebarChild } from '@/config/sidebarConfig';
+import { hasPermission, isHmsRole, getDashboardRoute } from '@/lib/permissions';
+import { ORG_SIDEBAR_CONFIG, SidebarItem, SidebarChild } from '@/config/orgSidebarConfig';
+import { HMS_SIDEBAR_CONFIG } from '@/config/hmsSidebarConfig';
 import { MoreHorizontal, LogOut, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-function getItemHref(item: SidebarItem, user: ReturnType<typeof useAuthStore.getState>['user']): string | null {
+function getItemHref(item: SidebarItem, user: ReturnType<typeof useAuthStore.getState>['user'], _config?: typeof ORG_SIDEBAR_CONFIG, _isHms?: boolean): string | null {
+  // HMS users: dashboard link goes to role-specific dashboard
+  if (_isHms && item.id === 'dashboard' && user) return getDashboardRoute(user);
   if (item.href) return item.href;
   if (item.children) {
     const first = item.children.find(c => {
@@ -24,9 +27,12 @@ function getItemHref(item: SidebarItem, user: ReturnType<typeof useAuthStore.get
   return null;
 }
 
-function getVisibleItems(user: ReturnType<typeof useAuthStore.getState>['user']): SidebarItem[] {
+function getVisibleItems(
+  user: ReturnType<typeof useAuthStore.getState>['user'],
+  config: typeof ORG_SIDEBAR_CONFIG = ORG_SIDEBAR_CONFIG
+): SidebarItem[] {
   if (!user) return [];
-  return SIDEBAR_CONFIG.filter(item => {
+  return config.filter(item => {
     if (item.adminOnly) return user.role === 'super_admin';
     if (item.alwaysShow) return true;
     if (item.permission) return hasPermission(user, item.permission);
@@ -46,10 +52,16 @@ function getVisibleItems(user: ReturnType<typeof useAuthStore.getState>['user'])
 export function MobileBottomNav() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, logout } = useAuthStore();
+  const { user, portal, logout } = useAuthStore();
   const [sheetOpen, setSheetOpen] = useState(false);
 
-  const visibleItems = useMemo(() => getVisibleItems(user), [user]);
+  const isHms = portal === 'hms' || (user ? isHmsRole(user.role) : false);
+
+  const activeConfig = useMemo(() => {
+    return isHms ? HMS_SIDEBAR_CONFIG : ORG_SIDEBAR_CONFIG;
+  }, [isHms]);
+
+  const visibleItems = useMemo(() => getVisibleItems(user, activeConfig), [user, activeConfig]);
 
   const mainItems = useMemo(() => {
     const dashboard = visibleItems.find(i => i.id === 'dashboard');
@@ -80,17 +92,17 @@ export function MobileBottomNav() {
   }, [sheetItems]);
 
   const isActive = useCallback((item: SidebarItem): boolean => {
-    const href = getItemHref(item, user);
+    const href = getItemHref(item, user, undefined, isHms);
     if (!href) return false;
     if (href === '/dashboard') return pathname === '/dashboard';
     return pathname.startsWith(href) && href !== '/dashboard';
-  }, [pathname, user]);
+  }, [pathname, user, isHms]);
 
   const handleLogout = useCallback(() => {
     logout();
     toast.success('See you soon!');
-    router.push('/login');
-  }, [logout, router]);
+    router.push(isHms ? '/hms/login' : '/login');
+  }, [logout, router, isHms]);
 
   if (visibleItems.length === 0) return null;
 
@@ -98,7 +110,7 @@ export function MobileBottomNav() {
     <>
       <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-slate-900 border-t border-default flex items-center justify-around px-2 pt-1 pb-1 safe-area-bottom lg:hidden shadow-[0_-2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_-2px_8px_rgba(0,0,0,0.3)]">
         {mainItems.map(item => {
-          const href = getItemHref(item, user);
+          const href = getItemHref(item, user, undefined, isHms);
           const active = isActive(item);
           const Icon = item.icon;
           return (
@@ -149,7 +161,7 @@ export function MobileBottomNav() {
                     <p className="text-[10px] font-bold text-muted uppercase tracking-wider px-2 pt-3 pb-1">{label}</p>
                   )}
                   {items.map(item => {
-                    const href = getItemHref(item, user);
+                    const href = getItemHref(item, user, undefined, isHms);
                     const active = isActive(item);
                     const Icon = item.icon;
 
