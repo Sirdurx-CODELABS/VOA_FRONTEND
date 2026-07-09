@@ -150,18 +150,18 @@ export default function HospitalDetailPage() {
                 { label: 'Hospital Name', key: 'name', icon: Building2 },
                 { label: 'Email', key: 'email', icon: Mail, type: 'email' },
                 { label: 'Phone', key: 'phone', icon: Phone },
-                { label: 'Type', key: 'type', type: 'select', options: ['general', 'specialist', 'teaching', 'clinic'] },
-              ].map(({ label, key, icon: Icon, type, options }) => (
-                <div key={key}>
-                  <label className="text-xs font-medium text-slate-500">{label}</label>
-                  {type === 'select' ? (
-                    <select value={form[key as keyof typeof form]} onChange={e => setForm({ ...form, [key]: e.target.value })}
+                { label: 'Type', key: 'type', icon: Building2, type: 'select', options: ['general', 'specialist', 'teaching', 'clinic'] },
+              ].map((item: { label: string; key: string; icon: React.ElementType; type?: string; options?: string[] }) => (
+                <div key={item.key}>
+                  <label className="text-xs font-medium text-slate-500">{item.label}</label>
+                  {item.type === 'select' ? (
+                    <select value={form[item.key as keyof typeof form]} onChange={e => setForm({ ...form, [item.key]: e.target.value })}
                       className="w-full mt-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm outline-none"
-                    >{options?.map(o => <option key={o} value={o}>{o}</option>)}</select>
+                    >{item.options?.map(o => <option key={o} value={o}>{o}</option>)}</select>
                   ) : (
                     <div className="relative mt-1">
-                      <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                      <input type={type || 'text'} value={form[key as keyof typeof form]} onChange={e => setForm({ ...form, [key]: e.target.value })}
+                      <item.icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input type={item.type || 'text'} value={form[item.key as keyof typeof form]} onChange={e => setForm({ ...form, [item.key]: e.target.value })}
                         className="w-full pl-10 pr-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm outline-none" />
                     </div>
                   )}

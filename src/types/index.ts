@@ -1245,7 +1245,9 @@ export interface WebsiteTemplate {
   thumbnail?: string;
   pages: WebsitePage[];
   style: WebsiteStyle;
+  version: number;
   isDefault: boolean;
+  status: 'active' | 'inactive' | 'draft';
 }
 
 export interface MediaItem {

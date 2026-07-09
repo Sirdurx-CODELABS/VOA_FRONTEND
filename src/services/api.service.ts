@@ -135,6 +135,9 @@ export const superAdminService = {
   getOrganizationStats: (id: string) => api.get(`/superadmin/organizations/${id}/stats`),
 
   // Announcements / Reports
+  getAnnouncements: (params?: object) => api.get('/superadmin/announcements', { params }),
+  createAnnouncement: (data: object) => api.post('/superadmin/announcements', data),
+  updateAnnouncement: (id: string, data: object) => api.put(`/superadmin/announcements/${id}`, data),
   deleteAnnouncement: (id: string) => api.delete(`/superadmin/announcements/${id}`),
   deleteReport: (id: string) => api.delete(`/superadmin/reports/${id}`),
 
@@ -169,7 +172,14 @@ export const superAdminService = {
 
   // Subscriptions
   getSubscriptions: (params?: object) => api.get('/superadmin/subscriptions', { params }),
+  getSubscriptionPlans: (params?: object) => api.get('/superadmin/subscriptions/plans', { params }),
+  createSubscriptionPlan: (data: object) => api.post('/superadmin/subscriptions/plans', data),
+  updateSubscriptionPlan: (id: string, data: object) => api.put(`/superadmin/subscriptions/plans/${id}`, data),
+  deleteSubscriptionPlan: (id: string) => api.delete(`/superadmin/subscriptions/plans/${id}`),
   updateSubscription: (id: string, data: object) => api.put(`/superadmin/subscriptions/${id}`, data),
+  createSubscription: (data: object) => api.post('/superadmin/subscriptions', data),
+  cancelSubscription: (id: string) => api.post(`/superadmin/subscriptions/${id}/cancel`),
+  renewSubscription: (id: string) => api.post(`/superadmin/subscriptions/${id}/renew`),
 
   // System Settings
   getSystemSettings: () => api.get('/superadmin/settings'),
