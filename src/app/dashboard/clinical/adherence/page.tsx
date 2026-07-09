@@ -152,7 +152,7 @@ export default function AdherencePage() {
                       <option value="adherence">Adherence Counseling</option>
                       <option value="psychosocial">Psychosocial Support</option>
                       <option value="disclosure">Disclosure Support</option>
-                      <option value="treatment_readiness">Treatment Readiness</option>
+                      <option value="treatment_literacy">Treatment Literacy</option>
                       <option value="other">Other</option>
                     </select>
                     <div className="flex gap-2">

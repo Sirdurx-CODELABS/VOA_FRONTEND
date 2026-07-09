@@ -4,10 +4,11 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { useUIStore } from '@/store/uiStore';
 import { useNotificationStore } from '@/store/notificationStore';
+import { useWorkspaceStore } from '@/store/workspaceStore';
 import { connectSocket } from '@/services/socket.service';
 import { notificationService } from '@/services/api.service';
 import { Notification } from '@/types';
-import { Menu, Bell, Sun, Moon, Monitor, LogOut, Settings, ChevronDown, Calendar, MessageSquare, Heart, Trophy, Info, Stethoscope, Pill, FlaskConical, HeartHandshake, ClipboardPlus, AlertTriangle } from 'lucide-react';
+import { Menu, Bell, Sun, Moon, Monitor, LogOut, Settings, ChevronDown, Calendar, MessageSquare, Heart, Trophy, Info, Stethoscope, Pill, FlaskConical, HeartHandshake, ClipboardPlus, AlertTriangle, Globe, Building2, X } from 'lucide-react';
 import { formatDateTime, getInitials, cn } from '@/lib/utils';
 import { Avatar } from '@/components/ui/Avatar';
 import toast from 'react-hot-toast';
@@ -61,6 +62,58 @@ export const Navbar = memo(function Navbar() {
   const clinInitSocket = useNotificationStore((s) => s.initSocketListener);
   const clinDestroySocket = useNotificationStore((s) => s.destroySocketListener);
   const [clinNotifOpen, setClinNotifOpen] = useState(false);
+
+  const isSuperAdmin = user?.role === 'super_admin';
+  const workspace = useWorkspaceStore();
+  const [wsOpen, setWsOpen] = useState(false);
+  const [wsType, setWsType] = useState<'hospital' | 'organisation'>('hospital');
+  const [wsEntities, setWsEntities] = useState<any[]>([]);
+  const [wsLoading, setWsLoading] = useState(false);
+  const [wsSearch, setWsSearch] = useState('');
+  const wsRef = useRef<HTMLDivElement>(null);
+
+  const fetchWorkspaceEntities = useCallback(async (type: 'hospital' | 'organisation') => {
+    setWsLoading(true);
+    try {
+      const { superAdminService } = await import('@/services/api.service');
+      if (type === 'hospital') {
+        const res = await superAdminService.getHospitals({ limit: 100 });
+        setWsEntities(res.data?.data || []);
+      } else {
+        const res = await superAdminService.getOrganizations({ limit: 100 });
+        setWsEntities(res.data?.data || []);
+      }
+    } catch { setWsEntities([]); }
+    setWsLoading(false);
+  }, []);
+
+  const handleWorkspaceSelect = (entity: any) => {
+    if (wsType === 'hospital') {
+      workspace.setHospital({ _id: entity._id, name: entity.name || entity.hospitalName, type: 'hospital', logoUrl: entity.logoUrl });
+    } else {
+      workspace.setOrganisation({ _id: entity._id, name: entity.organizationName || entity.name, type: 'organisation', logoUrl: entity.logoUrl });
+    }
+    setWsOpen(false);
+    router.push(wsType === 'hospital' ? '/dashboard' : '/dashboard');
+  };
+
+  const handleClearWorkspace = () => {
+    workspace.clearWorkspace();
+    setWsOpen(false);
+    router.push('/dashboard/admin');
+  };
+
+  useEffect(() => {
+    if (wsOpen && isSuperAdmin) fetchWorkspaceEntities(wsType);
+  }, [wsOpen, wsType, isSuperAdmin, fetchWorkspaceEntities]);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (wsRef.current && !wsRef.current.contains(e.target as Node)) setWsOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   const fetchNotifs = useCallback(async () => {
     if (isDoctorRoute) return;
@@ -137,6 +190,105 @@ export const Navbar = memo(function Navbar() {
       </div>
 
       <div className="flex items-center gap-1">
+        {/* Workspace Switcher (Super Admin only) */}
+        {isSuperAdmin && (
+          <div className="relative" ref={wsRef}>
+            <button onClick={() => setWsOpen(!wsOpen)}
+              className={cn(
+                'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors border',
+                workspace.type === 'global'
+                  ? 'border-amber-500/30 text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400'
+                  : workspace.type === 'hospital'
+                  ? 'border-blue-500/30 text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400'
+                  : 'border-emerald-500/30 text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400'
+              )}
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline capitalize">{workspace.type}</span>
+              {workspace.entity && <span className="hidden md:inline">: {workspace.entity.name}</span>}
+              <ChevronDown className={cn('w-3 h-3 transition-transform', wsOpen && 'rotate-180')} />
+            </button>
+
+            {wsOpen && (
+              <div className="absolute left-0 top-10 w-80 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 z-50 animate-slide-down overflow-hidden">
+                <div className="p-3 border-b border-slate-100 dark:border-slate-800">
+                  <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Workspace Switcher</p>
+                </div>
+
+                <div className="p-3 space-y-3">
+                  {/* Workspace type selector */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <button onClick={() => setWsType('hospital')}
+                      className={cn('flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold border transition-all',
+                        wsType === 'hospital'
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                          : 'border-default text-slate-600 dark:text-slate-400 hover:bg-hover'
+                      )}>
+                      <Building2 className="w-4 h-4" /> Hospital
+                    </button>
+                    <button onClick={() => setWsType('organisation')}
+                      className={cn('flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold border transition-all',
+                        wsType === 'organisation'
+                          ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300'
+                          : 'border-default text-slate-600 dark:text-slate-400 hover:bg-hover'
+                      )}>
+                      <Building2 className="w-4 h-4" /> Organisation
+                    </button>
+                  </div>
+
+                  {/* Search */}
+                  <input type="text" value={wsSearch} onChange={e => setWsSearch(e.target.value)}
+                    placeholder={`Search ${wsType}s...`}
+                    className="w-full px-3 py-2 rounded-lg border border-default bg-card-bg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+
+                  {/* Entity list */}
+                  <div className="max-h-48 overflow-y-auto space-y-1">
+                    {wsLoading ? (
+                      <div className="py-8 text-center text-xs text-muted">Loading...</div>
+                    ) : wsEntities.length === 0 ? (
+                      <div className="py-8 text-center text-xs text-muted">No {wsType}s found</div>
+                    ) : wsEntities
+                      .filter((e: any) => {
+                        const name = (e.name || e.hospitalName || e.organizationName || '').toLowerCase();
+                        return name.includes(wsSearch.toLowerCase());
+                      })
+                      .slice(0, 20)
+                      .map((entity: any) => (
+                        <button key={entity._id} onClick={() => handleWorkspaceSelect(entity)}
+                          className="w-full text-left flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-hover transition-colors text-sm"
+                        >
+                          <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold shrink-0">
+                            {(entity.name || entity.hospitalName || entity.organizationName || '?').charAt(0)}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold text-foreground truncate">{entity.name || entity.hospitalName || entity.organizationName}</p>
+                            <p className="text-xs text-muted truncate">{entity.state || entity.district || entity.email || ''}</p>
+                          </div>
+                        </button>
+                      ))}
+                  </div>
+                </div>
+
+                <div className="p-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                  {workspace.type !== 'global' && (
+                    <button onClick={handleClearWorkspace}
+                      className="w-full px-3 py-2 rounded-lg border border-amber-500/30 text-amber-600 text-sm font-semibold hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <X className="w-3.5 h-3.5" /> Clear Workspace
+                    </button>
+                  )}
+                  <button onClick={() => { router.push('/dashboard/admin'); setWsOpen(false); }}
+                    className="w-full px-3 py-2 rounded-lg text-xs text-muted hover:bg-hover transition-colors text-center"
+                  >
+                    Return to Global Dashboard
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Theme toggle */}
         <button onClick={() => setTheme(theme === 'system' ? 'light' : theme === 'light' ? 'dark' : 'system')}
           className="p-2 rounded-xl hover:bg-hover text-secondary transition-colors"

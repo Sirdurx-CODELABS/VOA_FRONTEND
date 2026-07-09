@@ -8,11 +8,17 @@ import { clinicalService } from '@/services/clinical.service';
 import {
   Stethoscope, ClipboardPlus, Pill, FlaskConical, HeartHandshake,
   UserPlus, Clock, UserCog, Activity, Loader2, Users, AlertTriangle,
-  ArrowRight, TrendingUp, CheckCircle,
+  ArrowRight, TrendingUp, CheckCircle, GitBranch, LogOut,
 } from 'lucide-react';
 
 const ROLE_SECTIONS = [
   { label: 'Triage Queue', href: '/dashboard/clinical/triage', icon: ClipboardPlus, perm: PERMISSIONS.TRIAGE_PATIENT, desc: 'Assess and prioritize incoming patients' },
+  { label: 'Visit Board', href: '/dashboard/clinical/workflow', icon: GitBranch, perm: PERMISSIONS.VIEW_WORKFLOW, desc: 'Kanban view of patient visits' },
+  { label: 'Check-in', href: '/dashboard/clinical/workflow/checkin', icon: LogOut, perm: PERMISSIONS.CHECK_IN_PATIENT, desc: 'Register arriving patients' },
+  { label: 'Doctor Queue', href: '/dashboard/clinical/workflow/doctor-queue', icon: Stethoscope, perm: PERMISSIONS.MANAGE_DOCTOR_QUEUE, desc: 'Patients waiting for consultation' },
+  { label: 'Lab Handoff', href: '/dashboard/clinical/workflow/lab-handoff', icon: FlaskConical, perm: PERMISSIONS.REQUEST_LAB, desc: 'Order lab tests from visits' },
+  { label: 'Rx Handoff', href: '/dashboard/clinical/workflow/pharmacy-handoff', icon: Pill, perm: PERMISSIONS.CREATE_PRESCRIPTION, desc: 'Create prescriptions' },
+  { label: 'Discharge', href: '/dashboard/clinical/workflow/discharge', icon: UserPlus, perm: PERMISSIONS.DISCHARGE_PATIENT, desc: 'Complete visits with follow-up' },
   { label: 'Pharmacy', href: '/dashboard/clinical/pharmacy', icon: Pill, perm: PERMISSIONS.DISPENSE_MEDICATION, desc: 'Review and dispense prescriptions' },
   { label: 'Laboratory', href: '/dashboard/clinical/laboratory', icon: FlaskConical, perm: PERMISSIONS.PROCESS_SAMPLE, desc: 'Process samples and upload results' },
   { label: 'Adherence', href: '/dashboard/clinical/adherence', icon: HeartHandshake, perm: PERMISSIONS.CONDUCT_COUNSELING, desc: 'Counsel patients and track adherence' },
@@ -25,7 +31,7 @@ const ROLE_SECTIONS = [
 export default function ClinicalDashboardPage() {
   const router = useRouter();
   const { user, isAuthenticated, _hydrated } = useAuthStore();
-  const [stats, setStats] = useState({ triage: 0, prescriptions: 0, labs: 0, critical: 0, cases: 0, adherence: 0 });
+  const [stats, setStats] = useState({ triage: 0, prescriptions: 0, labs: 0, critical: 0, cases: 0, adherence: 0, workflow: 0, doctorQueue: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -43,6 +49,8 @@ export default function ClinicalDashboardPage() {
           hasPermission(user, PERMISSIONS.FLAG_CRITICAL_RESULT) ? clinicalService.getCriticalResults() : null,
           hasPermission(user, PERMISSIONS.MANAGE_CASE) ? clinicalService.getHighRiskPatients() : null,
           hasPermission(user, PERMISSIONS.VIEW_ADHERENCE) ? clinicalService.getPoorAdherencePatients() : null,
+          hasPermission(user, PERMISSIONS.VIEW_WORKFLOW) ? clinicalService.getActiveWorkflowVisits() : null,
+          hasPermission(user, PERMISSIONS.MANAGE_DOCTOR_QUEUE) ? clinicalService.getWorkflowDoctorQueue() : null,
         ]);
         setStats({
           triage: results[0]?.status === 'fulfilled' && results[0].value ? results[0].value.data?.data?.length ?? 0 : 0,
@@ -51,6 +59,8 @@ export default function ClinicalDashboardPage() {
           critical: results[3]?.status === 'fulfilled' && results[3].value ? results[3].value.data?.data?.length ?? 0 : 0,
           cases: results[4]?.status === 'fulfilled' && results[4].value ? results[4].value.data?.data?.length ?? 0 : 0,
           adherence: results[5]?.status === 'fulfilled' && results[5].value ? results[5].value.data?.data?.length ?? 0 : 0,
+          workflow: results[6]?.status === 'fulfilled' && results[6].value ? results[6].value.data?.data?.length ?? 0 : 0,
+          doctorQueue: results[7]?.status === 'fulfilled' && results[7].value ? results[7].value.data?.data?.length ?? 0 : 0,
         });
       } catch { /* ignore */ }
       setLoading(false);
@@ -76,8 +86,10 @@ export default function ClinicalDashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
         <StatCard label="Triage Queue" value={stats.triage} icon={ClipboardPlus} color="text-orange-500" bg="bg-orange-500/10" loading={loading} />
+        <StatCard label="Active Visits" value={stats.workflow} icon={GitBranch} color="text-indigo-500" bg="bg-indigo-500/10" loading={loading} />
+        <StatCard label="Doctor Queue" value={stats.doctorQueue} icon={Stethoscope} color="text-green-500" bg="bg-green-500/10" loading={loading} />
         <StatCard label="Pending Rx" value={stats.prescriptions} icon={Pill} color="text-blue-500" bg="bg-blue-500/10" loading={loading} />
         <StatCard label="Lab Requests" value={stats.labs} icon={FlaskConical} color="text-purple-500" bg="bg-purple-500/10" loading={loading} />
         <StatCard label="Critical Results" value={stats.critical} icon={AlertTriangle} color="text-red-500" bg="bg-red-500/10" loading={loading} />

@@ -110,6 +110,12 @@ export const PERMISSIONS = {
   MANAGE_MEDICATION_ADMIN:      'manage_medication_administration',
   VIEW_STOCK:                   'view_stock',
   MANAGE_STOCK:                 'manage_stock',
+  // Workflow / Patient Visit
+  MANAGE_WORKFLOW:              'manage_workflow',
+  VIEW_WORKFLOW:                'view_workflow',
+  CHECK_IN_PATIENT:             'check_in_patient',
+  MANAGE_DOCTOR_QUEUE:          'manage_doctor_queue',
+  DISCHARGE_PATIENT:            'discharge_patient',
 } as const;
 
 export type Permission = typeof PERMISSIONS[keyof typeof PERMISSIONS];
@@ -203,6 +209,7 @@ const ROLE_PERMISSIONS: Record<Role, string[]> = {
     'edit_own_profile', 'change_own_password',
     'manage_announcements', 'view_announcements',
     'manage_organization',
+    'view_workflow', 'manage_workflow',
   ],
 
   doctor: [
@@ -221,6 +228,7 @@ const ROLE_PERMISSIONS: Record<Role, string[]> = {
     'view_document', 'upload_document',
     'edit_own_profile', 'change_own_password',
     'view_announcements', 'view_analytics',
+    'view_workflow', 'manage_workflow', 'manage_doctor_queue', 'discharge_patient',
   ],
 
   nurse: [
@@ -236,6 +244,7 @@ const ROLE_PERMISSIONS: Record<Role, string[]> = {
     'view_document', 'upload_document',
     'edit_own_profile', 'change_own_password',
     'view_announcements',
+    'view_workflow', 'check_in_patient',
   ],
 
   pharmacist: [
@@ -296,6 +305,7 @@ const ROLE_PERMISSIONS: Record<Role, string[]> = {
     'view_document', 'upload_document',
     'edit_own_profile', 'change_own_password',
     'view_announcements',
+    'view_workflow', 'check_in_patient',
   ],
 
   data_officer: [

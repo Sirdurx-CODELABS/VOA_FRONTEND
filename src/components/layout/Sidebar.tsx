@@ -4,17 +4,19 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { useUIStore } from '@/store/uiStore';
+import { useWorkspaceStore } from '@/store/workspaceStore';
 import { cn, getInitials } from '@/lib/utils';
 import { hasPermission, PERMISSIONS, isHmsRole, getDashboardRoute } from '@/lib/permissions';
 import { VOALogo } from '@/components/ui/VOALogo';
 import { Avatar } from '@/components/ui/Avatar';
 import { ORG_SIDEBAR_CONFIG, SidebarItem, SidebarChild } from '@/config/orgSidebarConfig';
 import { HMS_SIDEBAR_CONFIG } from '@/config/hmsSidebarConfig';
+import { SUPER_ADMIN_SIDEBAR_CONFIG, SuperAdminItem } from '@/config/superAdminSidebarConfig';
 import { notificationService, documentApprovalService } from '@/services/api.service';
 import { User } from '@/types';
 import toast from 'react-hot-toast';
 import {
-  ChevronLeft, ChevronRight, LogOut, Settings, Building2, Stethoscope,
+  ChevronLeft, ChevronRight, LogOut, Settings, Building2, Stethoscope, ShieldCheck,
 } from 'lucide-react';
 
 /* ── Badge pill ──────────────────────────────────────────────────────────── */
@@ -212,9 +214,19 @@ export const Sidebar = memo(function Sidebar() {
   const router = useRouter();
   const { user, organization, portal, logout } = useAuthStore();
   const { sidebarOpen, toggleSidebar, badgeCounts, setBadgeCounts } = useUIStore();
+  const workspace = useWorkspaceStore();
 
   const isHms = portal === 'hms' || (user ? isHmsRole(user.role) : false);
-  const SIDEBAR_CONFIG = isHms ? HMS_SIDEBAR_CONFIG : ORG_SIDEBAR_CONFIG;
+  const isSuperAdmin = user?.role === 'super_admin';
+
+  // Super Admin workspace-aware sidebar config
+  const getSidebarConfig = () => {
+    if (!isSuperAdmin) return isHms ? HMS_SIDEBAR_CONFIG : ORG_SIDEBAR_CONFIG;
+    if (workspace.type === 'hospital') return HMS_SIDEBAR_CONFIG;
+    if (workspace.type === 'organisation') return ORG_SIDEBAR_CONFIG;
+    return SUPER_ADMIN_SIDEBAR_CONFIG;
+  };
+  const SIDEBAR_CONFIG = getSidebarConfig();
 
   // Fetch badge counts periodically
   const fetchBadges = useCallback(async () => {
@@ -248,15 +260,14 @@ export const Sidebar = memo(function Sidebar() {
   }, [logout, router, isHms]);
 
   // Determine visibility
-  const isVisible = useCallback((item: SidebarItem): boolean => {
+  const isVisible = useCallback((item: any): boolean => {
     if (!user) return false;
     if (item.adminOnly) return user.role === 'super_admin';
     if (item.alwaysShow) return true;
     if (item.permission) return hasPermission(user, item.permission);
     if (item.roles) return item.roles.includes(user.role);
-    // Group items: visible if any child is visible
     if (item.children) {
-      return item.children.some((c: SidebarChild) => {
+      return item.children.some((c: any) => {
         if (c.alwaysShow) return true;
         if (c.permission) return hasPermission(user, c.permission);
         if (c.roles) return c.roles.includes(user.role);
@@ -273,10 +284,10 @@ export const Sidebar = memo(function Sidebar() {
 
   // Group items by section
   const sections = useMemo(() => {
-    const result: { label: string; items: SidebarItem[] }[] = [];
+    const result: { label: string; items: any[] }[] = [];
     let currentSection = '';
     const visible = SIDEBAR_CONFIG.filter(isVisible);
-    visible.forEach(item => {
+    visible.forEach((item: any) => {
       const sec = item.section || '';
       if (sec !== currentSection) {
         currentSection = sec;
@@ -285,7 +296,7 @@ export const Sidebar = memo(function Sidebar() {
       result[result.length - 1].items.push(item);
     });
     return result;
-  }, [isVisible]);
+  }, [isVisible, SIDEBAR_CONFIG]);
 
   const roleLabel = user ? `${user.isVice ? 'Vice ' : ''}${user.role.replace(/_/g, ' ')}` : '';
   const roleColor = user?.role === 'super_admin' ? 'text-amber-400' : 'text-cta';
@@ -307,7 +318,37 @@ export const Sidebar = memo(function Sidebar() {
           sidebarOpen ? 'justify-between' : 'justify-center',
         )}>
           {sidebarOpen && (
-            isHms ? (
+            isSuperAdmin && workspace.type === 'global' ? (
+              <div className="flex items-center gap-2.5 select-none">
+                <div className="w-[44px] h-[44px] rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+                  <ShieldCheck className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex flex-col leading-none">
+                  <span className="text-white font-extrabold text-base tracking-tight">VOA Platform</span>
+                  <span className="text-amber-400 font-medium text-[10px] tracking-widest uppercase">Super Admin</span>
+                </div>
+              </div>
+            ) : isSuperAdmin && workspace.type === 'hospital' ? (
+              <div className="flex items-center gap-2.5 select-none">
+                <div className="w-[44px] h-[44px] rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                  <Stethoscope className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex flex-col leading-none">
+                  <span className="text-white font-extrabold text-base tracking-tight">{workspace.entity?.name || 'Hospital'}</span>
+                  <span className="text-cta font-medium text-[10px] tracking-widest uppercase">Workspace</span>
+                </div>
+              </div>
+            ) : isSuperAdmin && workspace.type === 'organisation' ? (
+              <div className="flex items-center gap-2.5 select-none">
+                <div className="w-[44px] h-[44px] rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+                  <Building2 className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex flex-col leading-none">
+                  <span className="text-white font-extrabold text-base tracking-tight">{workspace.entity?.name || 'Organisation'}</span>
+                  <span className="text-cta font-medium text-[10px] tracking-widest uppercase">Workspace</span>
+                </div>
+              </div>
+            ) : isHms ? (
               <div className="flex items-center gap-2.5 select-none">
                 <div className="w-[44px] h-[44px] rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
                   <Stethoscope className="w-5 h-5 text-white" />
@@ -359,7 +400,7 @@ export const Sidebar = memo(function Sidebar() {
           {sections.map(({ label, items }, sectionIdx) => (
             <div key={`section-${sectionIdx}-${label || 'unlabeled'}`}>
               {label && <SectionLabel label={label} open={sidebarOpen} />}
-              {items.map(item => {
+              {items.map((item: any) => {
                 const badge = getBadge(item.badgeKey);
 
                 if (item.children) {
@@ -374,7 +415,6 @@ export const Sidebar = memo(function Sidebar() {
                   );
                 }
 
-                // HMS users: dashboard link goes to role-specific dashboard
                 const itemHref = (isHms && item.id === 'dashboard' && user)
                   ? getDashboardRoute(user)
                   : item.href;

@@ -81,6 +81,12 @@ export const clinicalService = {
   getVOAProfile: (id: string) => api.get(`/clinical/voa-profile/${id}`),
   listVOAProfiles: (params?: Record<string, string>) => api.get('/clinical/voa-profiles', { params }),
 
+  // ─── Prescription ────────────────────────────────────────────────────
+  createPrescription: (data: Record<string, unknown>) => api.post('/clinical/prescriptions', data),
+
+  // ─── Lab Request ─────────────────────────────────────────────────────
+  requestLab: (data: Record<string, unknown>) => api.post('/clinical/lab/request', data),
+
   // ─── Patient Search ─────────────────────────────────────────────────
   searchPatients: (q: string) => api.get('/clinical/patients/search', { params: { q } }),
   getPatientDetail: (id: string) => api.get(`/clinical/patients/${id}`),

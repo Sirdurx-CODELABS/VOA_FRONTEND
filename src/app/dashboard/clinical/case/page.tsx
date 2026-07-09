@@ -48,9 +48,8 @@ export default function CaseManagementPage() {
     try {
       await clinicalService.openCaseRecord({
         patient: selected.patient?._id || selected._id,
-        category: 'high_risk',
-        riskLevel: 'high',
-        status: 'active',
+        category: 'missed_appointments',
+        riskLevel: selected.riskLevel === 'critical' ? 'critical' : 'high',
       });
       toast.success('Case record opened');
       fetch();

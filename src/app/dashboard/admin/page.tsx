@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
 import { useAuthStore } from '@/store/authStore';
+import { useWorkspaceStore } from '@/store/workspaceStore';
 import { useRouter } from 'next/navigation';
 import { superAdminService } from '@/services/api.service';
 import { User } from '@/types';
@@ -11,8 +12,10 @@ import { SocialChannelsTab } from './_socialChannels';
 import { OrganizationsTab } from './_organizations';
 import { cn } from '@/lib/utils';
 import {
-  ShieldCheck, Users, Calendar, DollarSign, Heart,
-  AlertTriangle, ClipboardList, TrendingUp, Activity, Info, Share2, Building2,
+  ShieldCheck, Users, Calendar, DollarSign, Heart, Building2, Globe,
+  AlertTriangle, ClipboardList, TrendingUp, Activity, Info, Share2,
+  LayoutDashboard, Network, Stethoscope, Bot, LineChart, Megaphone,
+  Settings, Key, Bell, CreditCard, FileText, Image,
 } from 'lucide-react';
 
 type TabId = 'overview' | 'users' | 'organizations' | 'programs' | 'transactions' | 'welfare' | 'audit' | 'systemInfo' | 'socialChannels';
@@ -37,6 +40,7 @@ export default function SuperAdminPage() {
   const router = useRouter();
   const [tab, setTab] = useState<TabId>('overview');
   const [stats, setStats] = useState<{ users: { _id: string; count: number }[]; programs: { _id: string; count: number }[]; transactions: { _id: string; total: number }[]; pendingWelfare: number; totalAuditLogs: number } | null>(null);
+  const [platformStats, setPlatformStats] = useState<{ hospitals: number; organisations: number; websites: number; totalUsers: number } | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersPage, setUsersPage] = useState(1);
@@ -49,6 +53,22 @@ export default function SuperAdminPage() {
 
   useEffect(() => {
     superAdminService.getStats().then(r => setStats(r.data.data)).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    Promise.all([
+      superAdminService.getHospitals().then(r => r.data?.data || []).catch(() => []),
+      superAdminService.getOrganizations().then(r => r.data?.data || []).catch(() => []),
+      superAdminService.getWebsites().then(r => r.data?.data || []).catch(() => []),
+      superAdminService.getUsers({}).then(r => r.data?.data || []).catch(() => []),
+    ]).then(([hospitals, orgs, websites, users]) => {
+      setPlatformStats({
+        hospitals: hospitals.length,
+        organisations: orgs.length,
+        websites: websites.length,
+        totalUsers: Array.isArray(users) ? users.length : 0,
+      });
+    });
   }, []);
 
   const loadUsers = useCallback(async () => {
@@ -69,9 +89,17 @@ export default function SuperAdminPage() {
 
   if (!me || me.role !== 'super_admin') return null;
 
+  const quickActions = [
+    { label: 'Hospitals', href: '/dashboard/admin/hospitals', icon: Stethoscope, color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-900/20', count: platformStats?.hospitals },
+    { label: 'Organisations', href: '/dashboard/admin/organisations', icon: Building2, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20', count: platformStats?.organisations },
+    { label: 'Websites', href: '/dashboard/admin/websites', icon: Globe, color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-900/20', count: platformStats?.websites },
+    { label: 'AI Management', href: '/dashboard/admin/ai', icon: Bot, color: 'text-rose-600', bg: 'bg-rose-50 dark:bg-rose-900/20' },
+    { label: 'Analytics', href: '/dashboard/admin/analytics', icon: LineChart, color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-900/20' },
+    { label: 'Subscriptions', href: '/dashboard/admin/subscriptions', icon: CreditCard, color: 'text-teal-600', bg: 'bg-teal-50 dark:bg-teal-900/20' },
+  ];
+
   return (
     <div className="space-y-6 animate-slide-up">
-      {/* Header */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-[#1E3A8A] to-slate-900 p-6 text-white shadow-xl">
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#F97316] rounded-full -translate-y-1/2 translate-x-1/2" />
@@ -92,7 +120,6 @@ export default function SuperAdminPage() {
         </div>
       </div>
 
-      {/* Warning */}
       <div className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
         <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
         <p className="text-sm text-amber-700 dark:text-amber-300">
@@ -100,7 +127,6 @@ export default function SuperAdminPage() {
         </p>
       </div>
 
-      {/* Stats grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
         {[
           { label: 'Active Members', value: activeUsers, icon: Users, color: 'text-[#22C55E]', bg: 'bg-green-50 dark:bg-green-900/20', border: 'border-l-[#22C55E]' },
@@ -118,7 +144,21 @@ export default function SuperAdminPage() {
         ))}
       </div>
 
-      {/* Tabs */}
+      <div>
+        <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Platform Quick Access</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {quickActions.map(({ label, icon: Icon, color, bg, count, href }) => (
+            <button key={label} onClick={() => router.push(href)}
+              className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 flex flex-col items-center gap-2 hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-sm"
+            >
+              <div className={`p-2.5 rounded-xl ${bg}`}><Icon className={`w-5 h-5 ${color}`} /></div>
+              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 text-center">{label}</span>
+              {count !== undefined && <span className="text-[10px] text-slate-400">{count} total</span>}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
         <Tab label="Overview" icon={ShieldCheck} active={tab === 'overview'} onClick={() => setTab('overview')} />
         <Tab label="Users" icon={Users} active={tab === 'users'} onClick={() => setTab('users')} />
@@ -128,7 +168,6 @@ export default function SuperAdminPage() {
         <Tab label="Social Channels" icon={Share2} active={tab === 'socialChannels'} onClick={() => setTab('socialChannels')} />
       </div>
 
-      {/* Tab content */}
       {tab === 'overview' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
@@ -162,7 +201,6 @@ export default function SuperAdminPage() {
 
       {tab === 'organizations' && <OrganizationsTab />}
       {tab === 'audit' && <AuditTab />}
-
       {tab === 'systemInfo' && <SystemInfoTab />}
       {tab === 'socialChannels' && <SocialChannelsTab />}
     </div>

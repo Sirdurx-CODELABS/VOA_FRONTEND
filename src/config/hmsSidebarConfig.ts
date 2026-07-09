@@ -4,7 +4,7 @@ import {
   FlaskConical, HeartHandshake, UserPlus, Clock, UserCog,
   ClipboardPlus, Syringe, Heart, Ambulance, MessageSquare,
   BrainCircuit, Hospital, Building2, Microscope, Bone,
-  Apple, ClipboardList,
+  Apple, ClipboardList, GitBranch,
 } from 'lucide-react';
 import { Permission, PERMISSIONS } from '@/lib/permissions';
 
@@ -231,6 +231,23 @@ export const HMS_SIDEBAR_CONFIG: SidebarItem[] = [
     section: 'Communication',
     permission: PERMISSIONS.VIEW_DASHBOARD,
     roles: ['doctor'],
+  },
+
+  // ── PATIENT WORKFLOW ──────────────────────────────────────────────────
+  {
+    id: 'workflow',
+    label: 'Workflow',
+    icon: GitBranch,
+    section: 'Patient Care',
+    permission: PERMISSIONS.VIEW_WORKFLOW,
+    children: [
+      { label: 'Kanban Board',      href: '/dashboard/clinical/workflow',               permission: PERMISSIONS.VIEW_WORKFLOW },
+      { label: 'Check-in',          href: '/dashboard/clinical/workflow/checkin',        permission: PERMISSIONS.CHECK_IN_PATIENT },
+      { label: 'Doctor Queue',      href: '/dashboard/clinical/workflow/doctor-queue',   permission: PERMISSIONS.MANAGE_DOCTOR_QUEUE },
+      { label: 'Lab Handoff',       href: '/dashboard/clinical/workflow/lab-handoff',    permission: PERMISSIONS.REQUEST_LAB },
+      { label: 'Pharmacy Handoff',  href: '/dashboard/clinical/workflow/pharmacy-handoff', permission: PERMISSIONS.CREATE_PRESCRIPTION },
+      { label: 'Discharge',         href: '/dashboard/clinical/workflow/discharge',      permission: PERMISSIONS.DISCHARGE_PATIENT },
+    ],
   },
 
   // ── SYSTEM ────────────────────────────────────────────────────────────

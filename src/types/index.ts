@@ -1164,6 +1164,156 @@ export interface AdherenceOverview {
   activePatients: number;
 }
 
+// ─── Website Builder ────────────────────────────────────────────────
+export type WebsiteStatus = 'draft' | 'published' | 'unpublished';
+export type SectionType =
+  | 'hero' | 'about' | 'services' | 'programs' | 'departments'
+  | 'doctors' | 'leadership' | 'gallery' | 'testimonials' | 'partners'
+  | 'sponsors' | 'news' | 'faq' | 'cta' | 'contact' | 'footer'
+  | 'stats' | 'counters' | 'timeline' | 'pricing' | 'team'
+  | 'custom' | 'html';
+
+export interface WebsiteSEO {
+  title: string;
+  description: string;
+  keywords: string[];
+  ogImage?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  twitterCard?: string;
+  robots: string;
+  canonicalUrl?: string;
+}
+
+export interface WebsiteStyle {
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor: string;
+  fontFamily: string;
+  borderRadius: string;
+  spacing: string;
+  animations: boolean;
+  darkMode: boolean;
+  backgroundImage?: string;
+  heroImage?: string;
+}
+
+export interface WebsiteSection {
+  _id: string;
+  type: SectionType;
+  label: string;
+  visible: boolean;
+  settings: Record<string, any>;
+  content: Record<string, any>;
+  customStyle?: Record<string, any>;
+  sortOrder: number;
+}
+
+export interface WebsitePage {
+  _id: string;
+  title: string;
+  slug: string;
+  isHome: boolean;
+  status: 'draft' | 'published';
+  sections: WebsiteSection[];
+  seo?: { title?: string; description?: string };
+  sortOrder: number;
+}
+
+export interface Website {
+  _id: string;
+  entityType: 'hospital' | 'organisation' | 'alliance' | 'support_group';
+  entityId: string;
+  slug: string;
+  domain?: string;
+  title: string;
+  status: WebsiteStatus;
+  publishedAt?: string;
+  version: number;
+  style: WebsiteStyle;
+  seo: WebsiteSEO;
+  pages: WebsitePage[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WebsiteTemplate {
+  _id: string;
+  name: string;
+  description: string;
+  category: 'hospital' | 'organisation' | 'ngo' | 'support_group' | 'alliance' | 'medical' | 'community' | 'landing' | 'campaign';
+  thumbnail?: string;
+  pages: WebsitePage[];
+  style: WebsiteStyle;
+  isDefault: boolean;
+}
+
+export interface MediaItem {
+  _id: string;
+  fileName: string;
+  originalName: string;
+  mimeType: string;
+  url: string;
+  size: number;
+  entityType?: string;
+  entityId?: string;
+  uploadedBy?: string;
+  createdAt: string;
+}
+
+export interface WebsiteBlock {
+  id: string;
+  type: SectionType;
+  label: string;
+  description: string;
+  icon: string;
+  category: 'content' | 'media' | 'interactive' | 'layout';
+  defaultContent: Record<string, any>;
+  defaultSettings: Record<string, any>;
+}
+
+// ─── Workflow: PatientVisit ──────────────────────────────────────────
+export type WorkflowStatus =
+  | 'checked_in'
+  | 'triaged'
+  | 'in_consultation'
+  | 'lab_ordered'
+  | 'in_pharmacy'
+  | 'dispensed'
+  | 'discharged'
+  | 'cancelled';
+
+export interface PatientVisit {
+  _id: string;
+  patient: { _id: string; name: string; phone: string; age?: number; gender?: string };
+  hospital?: string | { _id: string; name: string };
+  doctor?: string | { _id: string; name: string };
+  triage?: {
+    category: string;
+    chiefComplaint: string;
+    painLevel: number;
+    notes: string;
+    doneBy: string | { _id: string; name: string };
+    doneAt: string;
+  };
+  vitals?: Vitals;
+  status: WorkflowStatus;
+  visitType: 'walk_in' | 'appointment' | 'emergency' | 'follow_up';
+  queueNumber?: number;
+  priority?: 'low' | 'normal' | 'urgent' | 'emergency';
+  chiefComplaint?: string;
+  checkedInBy?: string | { _id: string; name: string };
+  checkedInAt?: string;
+  startedConsultationAt?: string;
+  dischargedAt?: string;
+  dischargeSummary?: string;
+  diagnosis?: string;
+  notes?: string;
+  followUpDate?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ─── VOA Profile ─────────────────────────────────────────────────────
 export interface VOAProfile {
   _id: string;

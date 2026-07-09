@@ -137,6 +137,64 @@ export const superAdminService = {
   // Announcements / Reports
   deleteAnnouncement: (id: string) => api.delete(`/superadmin/announcements/${id}`),
   deleteReport: (id: string) => api.delete(`/superadmin/reports/${id}`),
+
+  // Hospitals
+  getHospitals: (params?: object) => api.get('/superadmin/hospitals', { params }),
+  getHospitalById: (id: string) => api.get(`/superadmin/hospitals/${id}`),
+  getHospitalStats: (id: string) => api.get(`/superadmin/hospitals/${id}/stats`),
+  createHospital: (data: object) => api.post('/superadmin/hospitals', data),
+  updateHospital: (id: string, data: object) => api.put(`/superadmin/hospitals/${id}`, data),
+  deleteHospital: (id: string) => api.delete(`/superadmin/hospitals/${id}`),
+
+  // Organizations (full)
+  getOrganizations: (params?: object) => api.get('/superadmin/organizations', { params }),
+  getOrganizationById: (id: string) => api.get(`/superadmin/organizations/${id}`),
+  createOrganization: (data: object) => api.post('/superadmin/organizations', data),
+  updateOrganization: (id: string, data: object) => api.put(`/superadmin/organizations/${id}`, data),
+  deleteOrganization: (id: string) => api.delete(`/superadmin/organizations/${id}`),
+  archiveOrganization: (id: string) => api.post(`/superadmin/organizations/${id}/archive`),
+  restoreOrganization: (id: string) => api.post(`/superadmin/organizations/${id}/restore`),
+
+  // Platform Analytics
+  getPlatformAnalytics: () => api.get('/superadmin/analytics/platform'),
+  getPlatformReports: (params?: object) => api.get('/superadmin/reports', { params }),
+
+  // AI Management
+  getAiConfig: () => api.get('/superadmin/ai/config'),
+  updateAiConfig: (data: object) => api.put('/superadmin/ai/config', data),
+  getPrompts: () => api.get('/superadmin/ai/prompts'),
+  updatePrompt: (id: string, data: object) => api.put(`/superadmin/ai/prompts/${id}`, data),
+  getKnowledgeBase: (params?: object) => api.get('/superadmin/ai/knowledge', { params }),
+  updateKnowledgeBase: (id: string, data: object) => api.put(`/superadmin/ai/knowledge/${id}`, data),
+
+  // Subscriptions
+  getSubscriptions: (params?: object) => api.get('/superadmin/subscriptions', { params }),
+  updateSubscription: (id: string, data: object) => api.put(`/superadmin/subscriptions/${id}`, data),
+
+  // System Settings
+  getSystemSettings: () => api.get('/superadmin/settings'),
+  updateSystemSettings: (data: object) => api.put('/superadmin/settings', data),
+
+  // API Keys
+  getApiKeys: () => api.get('/superadmin/api-keys'),
+  createApiKey: (data: object) => api.post('/superadmin/api-keys', data),
+  revokeApiKey: (id: string) => api.delete(`/superadmin/api-keys/${id}`),
+
+  // Website Builder
+  getWebsites: (params?: object) => api.get('/superadmin/websites', { params }),
+  getWebsiteById: (id: string) => api.get(`/superadmin/websites/${id}`),
+  createWebsite: (data: object) => api.post('/superadmin/websites', data),
+  updateWebsite: (id: string, data: object) => api.put(`/superadmin/websites/${id}`, data),
+  deleteWebsite: (id: string) => api.delete(`/superadmin/websites/${id}`),
+  publishWebsite: (id: string) => api.post(`/superadmin/websites/${id}/publish`),
+  unpublishWebsite: (id: string) => api.post(`/superadmin/websites/${id}/unpublish`),
+  getWebsiteTemplates: () => api.get('/superadmin/websites/templates'),
+  getWebsiteAnalytics: (id: string) => api.get(`/superadmin/websites/${id}/analytics`),
+
+  // Media Library
+  getMedia: (params?: object) => api.get('/superadmin/media', { params }),
+  uploadMedia: (data: FormData) => api.post('/superadmin/media/upload', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  deleteMedia: (id: string) => api.delete(`/superadmin/media/${id}`),
 };
 
 export const positionService = {

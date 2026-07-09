@@ -124,6 +124,21 @@ export const SIDEBAR_CONFIG: SidebarItem[] = [
     permission: PERMISSIONS.VIEW_PATIENT_TIMELINE,
     section: 'Clinical',
   },
+  {
+    id: 'workflow',
+    label: 'Workflow',
+    icon: GitBranch,
+    section: 'Clinical',
+    permission: PERMISSIONS.VIEW_WORKFLOW,
+    children: [
+      { label: 'Kanban Board',      href: '/dashboard/clinical/workflow',               permission: PERMISSIONS.VIEW_WORKFLOW },
+      { label: 'Check-in',          href: '/dashboard/clinical/workflow/checkin',        permission: PERMISSIONS.CHECK_IN_PATIENT },
+      { label: 'Doctor Queue',      href: '/dashboard/clinical/workflow/doctor-queue',   permission: PERMISSIONS.MANAGE_DOCTOR_QUEUE },
+      { label: 'Lab Handoff',       href: '/dashboard/clinical/workflow/lab-handoff',    permission: PERMISSIONS.REQUEST_LAB },
+      { label: 'Pharmacy Handoff',  href: '/dashboard/clinical/workflow/pharmacy-handoff', permission: PERMISSIONS.CREATE_PRESCRIPTION },
+      { label: 'Discharge',         href: '/dashboard/clinical/workflow/discharge',      permission: PERMISSIONS.DISCHARGE_PATIENT },
+    ],
+  },
 
   // ── PEOPLE ────────────────────────────────────────────────────────────────
   {
