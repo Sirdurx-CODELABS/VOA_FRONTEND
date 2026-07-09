@@ -125,7 +125,7 @@ export default function RegisterPage() {
 
   useEffect(() => {
     api.get('/organizations/public')
-      .then(res => setOrganizations(res.data || []))
+      .then(res => setOrganizations(res.data?.data || []))
       .catch(() => toast.error('Failed to load organizations'))
       .finally(() => setLoadingOrgs(false));
   }, []);

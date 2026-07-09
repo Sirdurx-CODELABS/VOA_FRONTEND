@@ -84,4 +84,17 @@ export const clinicalService = {
   // ─── Patient Search ─────────────────────────────────────────────────
   searchPatients: (q: string) => api.get('/clinical/patients/search', { params: { q } }),
   getPatientDetail: (id: string) => api.get(`/clinical/patients/${id}`),
+
+  // ─── Workflow: PatientVisit ────────────────────────────────────────
+  getWorkflowQueue: (params?: Record<string, string>) => api.get('/clinical/workflow/queue', { params }),
+  getWorkflowDoctorQueue: () => api.get('/clinical/workflow/doctor-queue'),
+  getActiveWorkflowVisits: (params?: Record<string, string>) => api.get('/clinical/workflow/visits', { params }),
+  getWorkflowVisitById: (id: string) => api.get(`/clinical/workflow/visits/${id}`),
+  checkInPatient: (data: Record<string, unknown>) => api.post('/clinical/workflow/check-in', data),
+  transitionWorkflowVisit: (visitId: string, data: Record<string, unknown>) =>
+    api.post(`/clinical/workflow/transition/${visitId}`, data),
+  dischargePatient: (visitId: string, data: Record<string, unknown>) =>
+    api.post(`/clinical/workflow/discharge/${visitId}`, data),
+  startVisitConsultation: (visitId: string) =>
+    api.post(`/clinical/workflow/start-consultation/${visitId}`),
 };
